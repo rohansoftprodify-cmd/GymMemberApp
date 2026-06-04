@@ -97,6 +97,12 @@ class _MemberShellPageState extends ConsumerState<MemberShellPage> {
             ),
             actions: [
               IconButton(
+                tooltip: 'My profile',
+                onPressed: () => context.push('/profile'),
+                icon: Icon(Icons.person_rounded, color: colorScheme.primary, size: 22),
+              ),
+              IconButton(
+                tooltip: 'Sign out',
                 onPressed: () async {
                   final shouldLogout = await showDialog<bool>(
                     context: context,

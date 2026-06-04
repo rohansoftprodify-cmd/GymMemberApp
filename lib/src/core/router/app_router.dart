@@ -2,6 +2,7 @@ import 'package:go_router/go_router.dart';
 import 'package:gym_member_app/src/features/auth/login_page.dart';
 import 'package:gym_member_app/src/features/explore/explore_page.dart';
 import 'package:gym_member_app/src/features/gyms/gym_detail_page.dart';
+import 'package:gym_member_app/src/features/profile/member_profile_page.dart';
 import 'package:gym_member_app/src/features/shell/member_shell_page.dart';
 import 'package:gym_member_app/src/features/splash/splash_page.dart';
 
@@ -18,6 +19,7 @@ final appRouter = GoRouter(
         return GymDetailPage(gymId: gymId);
       },
     ),
+    GoRoute(path: '/profile', builder: (_, state) => const MemberProfilePage()),
     GoRoute(path: '/', builder: (_, state) => const MemberShellPage()),
   ],
 );

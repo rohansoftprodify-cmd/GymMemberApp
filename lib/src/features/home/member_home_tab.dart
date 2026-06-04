@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:gym_member_app/src/core/data/member_repository.dart';
 import 'package:gym_member_app/src/core/tenant/member_context_provider.dart';
 import 'package:gym_member_app/src/core/theme/app_theme_extensions.dart';
 import 'package:gym_member_app/src/core/ui/section_header.dart';
 import 'package:gym_member_app/src/features/attendance/my_attendance_page.dart';
-import 'package:gym_member_app/src/features/home/widgets/check_in_status_card.dart';
+import 'package:gym_member_app/src/features/home/widgets/home_plan_card.dart';
+import 'package:gym_member_app/src/features/home/widgets/home_quick_stat_card.dart';
+import 'package:gym_member_app/src/features/home/widgets/home_recent_attendance_section.dart';
+import 'package:gym_member_app/src/features/home/widgets/home_section_label.dart';
+import 'package:gym_member_app/src/features/home/widgets/home_welcome_header.dart';
 import 'package:gym_member_app/src/features/home/widgets/offers_carousel.dart';
 import 'package:gym_member_app/src/features/home/widgets/payment_dues_list.dart';
-import 'package:gym_member_app/src/features/home/widgets/today_slot_card.dart';
 import 'package:intl/intl.dart';
 
 class MemberHomeTab extends ConsumerWidget {
@@ -21,12 +25,16 @@ class MemberHomeTab extends ConsumerWidget {
   final MemberContext member;
   final VoidCallback? onGoToAttendance;
 
+  static const _dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  static const _sectionGap = 20.0;
+  static const _quickStatHeight = 132.0;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final semantics = context.appColors;
+    final colorScheme = theme.colorScheme;
     final sub = member.subscription;
-    final dateFormat = DateFormat.yMMMd();
     final repo = ref.read(memberRepositoryProvider);
 
     return FutureBuilder<List<dynamic>>(
@@ -47,88 +55,86 @@ class MemberHomeTab extends ConsumerWidget {
         final recentAttendance = snap.data![3] as List<Map<String, dynamic>>;
         final format = DateFormat('MMM d · h:mm a');
 
+        final isCheckedIn = openRecord != null;
+        final todayName = _dayNames[DateTime.now().weekday - 1];
+        final slot = _slotInfo(hoursRow, todayName, colorScheme.primary, semantics);
+
         return ListView(
           padding: const EdgeInsets.only(bottom: 100, top: 4),
           children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: semantics.cardBackground,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.35)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            HomeWelcomeHeader(
+              member: member,
+              onTapProfile: () => context.push('/profile'),
+            ),
+            const SizedBox(height: _sectionGap),
+            const HomeSectionLabel(title: 'Today', icon: Icons.today_rounded),
+            SizedBox(
+              height: _quickStatHeight,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(
-                    'Welcome, ${member.fullName}',
-                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+                  Expanded(
+                    child: HomeQuickStatCard(
+                      icon: isCheckedIn ? Icons.login_rounded : Icons.logout_rounded,
+                      label: 'Attendance',
+                      value: isCheckedIn ? 'Checked in' : 'Checked out',
+                      accentColor: isCheckedIn ? colorScheme.primary : semantics.mutedText,
+                      highlighted: isCheckedIn,
+                      actionLabel: 'Open',
+                      onAction: onGoToAttendance,
+                    ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    member.email ?? member.phone ?? '',
-                    style: theme.textTheme.labelSmall?.copyWith(color: semantics.mutedText),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: HomeQuickStatCard(
+                      icon: slot.icon,
+                      label: "Today's slot",
+                      value: slot.value,
+                      accentColor: slot.color,
+                      highlighted: slot.highlighted,
+                    ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 12),
-            if (sub != null) ...[
+            if (isCheckedIn && openRecord != null) ...[
+              const SizedBox(height: 10),
               Container(
-                padding: const EdgeInsets.all(16),
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 decoration: BoxDecoration(
-                  color: semantics.cardBackground,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.35)),
+                  color: colorScheme.primary.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: colorScheme.primary.withValues(alpha: 0.25)),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Plan details',
-                      style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      sub.planName,
-                      style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      '${dateFormat.format(DateTime.parse(sub.startDate))} → ${dateFormat.format(DateTime.parse(sub.endDate))}',
-                      style: theme.textTheme.labelSmall?.copyWith(color: semantics.mutedText),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Payment: ${sub.paymentStatus.toUpperCase()} · Paid ₹${sub.amountPaid} / ₹${sub.planPrice}',
-                      style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.primary),
-                    ),
-                  ],
+                child: Text(
+                  'Checked in since ${DateFormat.jm().format(DateTime.parse(openRecord['check_in_at'] as String).toLocal())}',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: colorScheme.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
-              const SizedBox(height: 12),
             ],
-            TodaySlotCard(hoursRow: hoursRow),
-            const SizedBox(height: 12),
-            CheckInStatusCard(
-              openRecord: openRecord,
-              onGoToAttendance: onGoToAttendance,
-            ),
-            const SizedBox(height: 16),
-            const SectionHeader(title: 'Offers by gym'),
-            const SizedBox(height: 8),
-            OffersCarousel(promotions: promos),
             if (sub != null) ...[
-              const SizedBox(height: 16),
+              const SizedBox(height: _sectionGap),
+              HomePlanCard(subscription: sub),
+            ],
+            const SizedBox(height: _sectionGap),
+            const SectionHeader(title: 'Offers'),
+            const SizedBox(height: 6),
+            OffersCarousel(promotions: promos),
+            if (sub != null && _showPaymentAlerts(sub)) ...[
+              const SizedBox(height: _sectionGap),
               const SectionHeader(title: 'Payment alerts'),
-              const SizedBox(height: 8),
+              const SizedBox(height: 6),
               PaymentDuesList(subscription: sub),
             ],
-            const SizedBox(height: 16),
-            SectionHeader(
-              title: 'Last 5 attendance',
-              actionLabel: 'View all',
-              onAction: () => Navigator.of(context).push(
+            const SizedBox(height: _sectionGap),
+            HomeRecentAttendanceSection(
+              records: recentAttendance,
+              format: format,
+              onViewAll: () => Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (_) => MyAttendancePage(
                     gymId: member.gymId,
@@ -137,47 +143,69 @@ class MemberHomeTab extends ConsumerWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 8),
-            if (recentAttendance.isEmpty)
-              Text(
-                'No visits recorded yet.',
-                style: theme.textTheme.labelMedium?.copyWith(color: semantics.mutedText),
-              )
-            else
-              ...recentAttendance.map((row) {
-                final checkIn = DateTime.parse(row['check_in_at'] as String).toLocal();
-                final checkOutRaw = row['check_out_at'] as String?;
-                return Container(
-                  width: double.infinity,
-                  margin: const EdgeInsets.only(bottom: 8),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: semantics.cardBackground,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: theme.colorScheme.outlineVariant.withValues(alpha: 0.35),
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        format.format(checkIn),
-                        style: const TextStyle(fontWeight: FontWeight.w700),
-                      ),
-                      Text(
-                        checkOutRaw == null
-                            ? 'Still checked in'
-                            : 'Out ${format.format(DateTime.parse(checkOutRaw).toLocal())}',
-                        style: theme.textTheme.labelSmall?.copyWith(color: semantics.mutedText),
-                      ),
-                    ],
-                  ),
-                );
-              }),
           ],
         );
       },
     );
   }
+
+  static bool _showPaymentAlerts(MemberSubscriptionContext sub) {
+    final status = sub.paymentStatus.toLowerCase();
+    if (status == 'due' || status == 'partial') return true;
+    final end = DateTime.tryParse(sub.endDate);
+    if (end == null) return false;
+    final days = end.difference(DateTime.now()).inDays;
+    return days <= 15;
+  }
+
+  static _SlotDisplay _slotInfo(
+    Map<String, dynamic>? hoursRow,
+    String todayName,
+    Color primary,
+    AppSemanticColors semantics,
+  ) {
+    if (hoursRow == null) {
+      return _SlotDisplay(
+        icon: Icons.schedule_rounded,
+        value: 'Not set',
+        color: semantics.mutedText,
+      );
+    }
+    if (hoursRow['is_closed'] == true) {
+      return _SlotDisplay(
+        icon: Icons.event_busy_rounded,
+        value: '$todayName · Closed',
+        color: semantics.accentCoral,
+      );
+    }
+    final open = _formatTime(hoursRow['open_time']);
+    final close = _formatTime(hoursRow['close_time']);
+    return _SlotDisplay(
+      icon: Icons.access_time_rounded,
+      value: '$open – $close',
+      color: primary,
+      highlighted: true,
+    );
+  }
+
+  static String _formatTime(dynamic raw) {
+    if (raw == null) return '—';
+    final s = raw.toString();
+    if (s.length >= 5) return s.substring(0, 5);
+    return s;
+  }
+}
+
+class _SlotDisplay {
+  const _SlotDisplay({
+    required this.icon,
+    required this.value,
+    required this.color,
+    this.highlighted = false,
+  });
+
+  final IconData icon;
+  final String value;
+  final Color color;
+  final bool highlighted;
 }

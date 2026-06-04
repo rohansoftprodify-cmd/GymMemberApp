@@ -5,6 +5,12 @@ import 'package:gym_member_app/src/core/tenant/member_context_provider.dart';
 import 'package:gym_member_app/src/core/theme/app_theme_extensions.dart';
 import 'package:gym_member_app/src/features/attendance/location_check_service.dart';
 import 'package:gym_member_app/src/features/attendance/qr_scan_page.dart';
+import 'package:gym_member_app/src/features/attendance/widgets/attendance_method_card.dart';
+import 'package:gym_member_app/src/features/attendance/widgets/attendance_stats_row.dart';
+import 'package:gym_member_app/src/features/attendance/widgets/attendance_status_hero.dart';
+import 'package:gym_member_app/src/features/home/widgets/home_recent_attendance_section.dart';
+import 'package:gym_member_app/src/features/home/widgets/home_section_label.dart';
+import 'package:gym_member_app/src/features/attendance/my_attendance_page.dart';
 import 'package:intl/intl.dart';
 
 class MemberAttendanceTab extends ConsumerStatefulWidget {
@@ -20,17 +26,9 @@ class _MemberAttendanceTabState extends ConsumerState<MemberAttendanceTab> {
   int _reloadToken = 0;
   bool _busy = false;
 
+  static const _sectionGap = 18.0;
+
   void _refresh() => setState(() => _reloadToken++);
-
-  Future<Map<String, dynamic>?> _loadGymInfo() {
-    return ref.read(memberRepositoryProvider).gymInfo(widget.member.gymId);
-  }
-
-  Future<Map<String, dynamic>?> _loadOpen() {
-    return ref
-        .read(memberRepositoryProvider)
-        .openAttendance(widget.member.gymId, widget.member.memberId);
-  }
 
   Future<void> _performAction(String action) async {
     if (_busy) return;
@@ -43,7 +41,9 @@ class _MemberAttendanceTabState extends ConsumerState<MemberAttendanceTab> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(action == 'check_in' ? 'Checked in successfully' : 'Checked out successfully'),
+          content: Text(
+            action == 'check_in' ? 'Checked in successfully' : 'Checked out successfully',
+          ),
         ),
       );
       _refresh();
@@ -58,14 +58,20 @@ class _MemberAttendanceTabState extends ConsumerState<MemberAttendanceTab> {
     }
   }
 
-  Future<void> _locationAttendance() async {
+  Future<void> _locationAttendance(Map<String, dynamic>? gym, Map<String, dynamic>? open) async {
     if (_busy) return;
-    final gym = await _loadGymInfo();
-    if (!mounted) return;
 
     final lat = (gym?['latitude'] as num?)?.toDouble();
     final lng = (gym?['longitude'] as num?)?.toDouble();
     final radius = (gym?['check_in_radius_meters'] as num?)?.toInt() ?? 150;
+    final hasCoords = lat != null && lng != null;
+
+    if (!hasCoords) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Gym location is not configured. Use QR check-in or contact staff.')),
+      );
+      return;
+    }
 
     setState(() => _busy = true);
     final locationResult = await verifyNearGym(
@@ -83,12 +89,11 @@ class _MemberAttendanceTabState extends ConsumerState<MemberAttendanceTab> {
       return;
     }
 
-    final open = await _loadOpen();
     final action = open == null ? 'check_in' : 'check_out';
     await _performAction(action);
   }
 
-  Future<void> _qrAttendance() async {
+  Future<void> _qrAttendance(Map<String, dynamic>? open) async {
     if (_busy) return;
     final ok = await Navigator.of(context).push<bool>(
       MaterialPageRoute(
@@ -97,9 +102,18 @@ class _MemberAttendanceTabState extends ConsumerState<MemberAttendanceTab> {
     );
     if (ok != true || !mounted) return;
 
-    final open = await _loadOpen();
     final action = open == null ? 'check_in' : 'check_out';
     await _performAction(action);
+  }
+
+  static int _visitsToday(List<Map<String, dynamic>> records) {
+    final now = DateTime.now();
+    return records.where((row) {
+      final raw = row['check_in_at'] as String?;
+      final time = raw == null ? null : DateTime.tryParse(raw)?.toLocal();
+      if (time == null) return false;
+      return time.year == now.year && time.month == now.month && time.day == now.day;
+    }).length;
   }
 
   @override
@@ -108,228 +122,131 @@ class _MemberAttendanceTabState extends ConsumerState<MemberAttendanceTab> {
     final semantics = context.appColors;
     final colorScheme = theme.colorScheme;
     final repo = ref.read(memberRepositoryProvider);
+    final timeFormat = DateFormat('MMM d · h:mm a');
+    final listFormat = DateFormat('MMM d · h:mm a');
 
     return FutureBuilder<List<dynamic>>(
       key: ValueKey(_reloadToken),
-      future: Future.wait([
-        _loadOpen(),
-        _loadGymInfo(),
+      future: Future.wait<dynamic>([
+        repo.openAttendance(widget.member.gymId, widget.member.memberId),
+        repo.gymInfo(widget.member.gymId),
+        repo.myAttendance(widget.member.gymId, widget.member.memberId, limit: 30),
       ]),
       builder: (context, snap) {
+        if (snap.hasError) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Text(snap.error.toString(), textAlign: TextAlign.center),
+            ),
+          );
+        }
         if (!snap.hasData) {
           return const Center(child: CircularProgressIndicator());
         }
 
         final open = snap.data![0] as Map<String, dynamic>?;
         final gym = snap.data![1] as Map<String, dynamic>?;
-        final isCheckedIn = open != null;
-        final checkInLabel = open == null
-            ? null
-            : DateFormat('MMM d · h:mm a')
-                .format(DateTime.parse(open['check_in_at'] as String).toLocal());
+        final allRecords = snap.data![2] as List<Map<String, dynamic>>;
+        final recentRecords = allRecords.take(5).toList();
 
-        return ListView(
-          padding: const EdgeInsets.only(bottom: 100, top: 8),
-          children: [
-            Container(
-              padding: const EdgeInsets.all(18),
-              decoration: BoxDecoration(
-                color: semantics.cardBackground,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: isCheckedIn
-                      ? colorScheme.primary.withValues(alpha: 0.4)
-                      : colorScheme.outlineVariant.withValues(alpha: 0.35),
-                ),
+        final isCheckedIn = open != null;
+        final checkInSince = open == null
+            ? null
+            : timeFormat.format(DateTime.parse(open['check_in_at'] as String).toLocal());
+        final hasCoords = gym?['latitude'] != null && gym?['longitude'] != null;
+        final radius = gym?['check_in_radius_meters'] ?? 150;
+
+        return RefreshIndicator(
+          onRefresh: () async => _refresh(),
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.only(bottom: 100, top: 4),
+            children: [
+              AttendanceStatusHero(
+                isCheckedIn: isCheckedIn,
+                checkInSince: checkInSince,
+                gymName: widget.member.gymName,
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+              const SizedBox(height: _sectionGap),
+              AttendanceStatsRow(
+                totalVisits: allRecords.length,
+                visitsToday: _visitsToday(allRecords),
+                isCheckedIn: isCheckedIn,
+              ),
+              const SizedBox(height: _sectionGap),
+              const HomeSectionLabel(
+                title: 'Check-in methods',
+                icon: Icons.touch_app_rounded,
+              ),
+              AttendanceMethodCard(
+                icon: Icons.my_location_rounded,
+                title: 'At gym (location)',
+                subtitle: hasCoords
+                    ? 'Must be within ${radius}m of the gym entrance'
+                    : 'Gym GPS not set — ask staff or use QR',
+                buttonLabel: isCheckedIn ? 'Check out with location' : 'Check in with location',
+                onPressed: () => _locationAttendance(gym, open),
+                loading: _busy,
+                enabled: hasCoords,
+                accentColor: colorScheme.primary,
+              ),
+              const SizedBox(height: 10),
+              AttendanceMethodCard(
+                icon: Icons.qr_code_scanner_rounded,
+                title: 'Scan QR code',
+                subtitle: 'Scan the QR code displayed at your gym entrance',
+                buttonLabel: isCheckedIn ? 'Scan to check out' : 'Scan to check in',
+                onPressed: () => _qrAttendance(open),
+                loading: _busy,
+                accentColor: colorScheme.secondary,
+              ),
+              if (!hasCoords) ...[
+                const SizedBox(height: 10),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: colorScheme.errorContainer.withValues(alpha: 0.35),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
                     children: [
-                      Icon(
-                        isCheckedIn ? Icons.login_rounded : Icons.logout_rounded,
-                        color: isCheckedIn ? colorScheme.primary : semantics.mutedText,
-                      ),
+                      Icon(Icons.info_outline_rounded, size: 18, color: colorScheme.error),
                       const SizedBox(width: 10),
-                      Text(
-                        isCheckedIn ? 'You are checked in' : 'You are checked out',
-                        style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+                      Expanded(
+                        child: Text(
+                          'Location check-in needs gym coordinates. QR check-in still works.',
+                          style: theme.textTheme.labelSmall,
+                        ),
                       ),
                     ],
                   ),
-                  if (checkInLabel != null) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      'Since $checkInLabel',
-                      style: theme.textTheme.labelSmall?.copyWith(color: semantics.mutedText),
+                ),
+              ],
+              const SizedBox(height: _sectionGap),
+              HomeRecentAttendanceSection(
+                records: recentRecords,
+                format: listFormat,
+                onViewAll: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => MyAttendancePage(
+                      gymId: widget.member.gymId,
+                      memberId: widget.member.memberId,
                     ),
-                  ],
-                  const SizedBox(height: 14),
-                  Text(
-                    isCheckedIn
-                        ? 'Use either method below to check out.'
-                        : 'Use either method below to check in at the gym.',
-                    style: theme.textTheme.labelSmall?.copyWith(color: semantics.mutedText),
                   ),
-                ],
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Check-in / Check-out',
-              style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
-            ),
-            const SizedBox(height: 10),
-            _MethodCard(
-              icon: Icons.my_location_rounded,
-              title: 'At gym (location)',
-              subtitle: gym?['latitude'] == null
-                  ? 'Gym coordinates not set — contact staff'
-                  : 'Must be within ${gym?['check_in_radius_meters'] ?? 150}m of the gym',
-              buttonLabel: isCheckedIn ? 'Check out here' : 'Check in here',
-              onPressed: _busy ? null : _locationAttendance,
-              loading: _busy,
-            ),
-            const SizedBox(height: 10),
-            _MethodCard(
-              icon: Icons.qr_code_scanner_rounded,
-              title: 'Scan QR code',
-              subtitle: 'Scan the QR posted at your gym entrance',
-              buttonLabel: isCheckedIn ? 'Scan to check out' : 'Scan to check in',
-              onPressed: _busy ? null : _qrAttendance,
-              loading: _busy,
-            ),
-            const SizedBox(height: 20),
-            Text(
-              'Recent visits',
-              style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
-            ),
-            const SizedBox(height: 8),
-            FutureBuilder<List<Map<String, dynamic>>>(
-              future: repo.myAttendance(widget.member.gymId, widget.member.memberId, limit: 5),
-              builder: (context, attSnap) {
-                if (!attSnap.hasData) {
-                  return const Padding(
-                    padding: EdgeInsets.all(24),
-                    child: Center(child: CircularProgressIndicator()),
-                  );
-                }
-                final rows = attSnap.data!;
-                if (rows.isEmpty) {
-                  return Text(
-                    'No attendance yet.',
-                    style: theme.textTheme.labelMedium?.copyWith(color: semantics.mutedText),
-                  );
-                }
-                final format = DateFormat('MMM d, y · h:mm a');
-                return Column(
-                  children: [
-                    for (final row in rows)
-                      Container(
-                        width: double.infinity,
-                        margin: const EdgeInsets.only(bottom: 8),
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: semantics.cardBackground,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: colorScheme.outlineVariant.withValues(alpha: 0.35),
-                          ),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'In: ${format.format(DateTime.parse(row['check_in_at'] as String).toLocal())}',
-                              style: const TextStyle(fontWeight: FontWeight.w700),
-                            ),
-                            Text(
-                              row['check_out_at'] == null
-                                  ? 'Still checked in'
-                                  : 'Out: ${format.format(DateTime.parse(row['check_out_at'] as String).toLocal())}',
-                              style: theme.textTheme.labelSmall?.copyWith(color: semantics.mutedText),
-                            ),
-                          ],
-                        ),
-                      ),
-                  ],
-                );
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-}
-
-class _MethodCard extends StatelessWidget {
-  const _MethodCard({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.buttonLabel,
-    required this.onPressed,
-    this.loading = false,
-  });
-
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final String buttonLabel;
-  final VoidCallback? onPressed;
-  final bool loading;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final semantics = context.appColors;
-    final colorScheme = theme.colorScheme;
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: semantics.cardBackground,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.35)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, color: colorScheme.primary),
-              const SizedBox(width: 10),
-              Expanded(
+              const SizedBox(height: 12),
+              Center(
                 child: Text(
-                  title,
-                  style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
+                  'Pull down to refresh status',
+                  style: theme.textTheme.labelSmall?.copyWith(color: semantics.mutedText),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 6),
-          Text(
-            subtitle,
-            style: theme.textTheme.labelSmall?.copyWith(color: semantics.mutedText),
-          ),
-          const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton(
-              onPressed: onPressed,
-              child: loading
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : Text(buttonLabel),
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

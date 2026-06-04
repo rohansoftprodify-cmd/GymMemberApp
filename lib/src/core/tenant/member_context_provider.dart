@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gym_member_app/src/core/supabase/supabase_client_provider.dart';
+import 'package:gym_member_app/src/core/utils/json_map.dart';
 
 class MemberContext {
   const MemberContext({
@@ -75,6 +76,5 @@ final memberContextProvider = FutureProvider<MemberContext?>((ref) async {
 
   final response = await client.rpc('get_my_member_context');
   if (response == null) return null;
-  if (response is! Map<String, dynamic>) return null;
-  return MemberContext.fromMap(response);
+  return MemberContext.fromMap(asStringKeyMap(response));
 });

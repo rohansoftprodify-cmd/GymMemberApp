@@ -1,11 +1,19 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gym_member_app/src/core/supabase/supabase_client_provider.dart';
+import 'package:gym_member_app/src/core/tenant/member_profile.dart';
+import 'package:gym_member_app/src/core/utils/json_map.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class MemberRepository {
   MemberRepository(this._client);
 
   final SupabaseClient _client;
+
+  Future<MemberProfile?> myProfile() async {
+    final response = await _client.rpc('get_my_member_profile');
+    if (response == null) return null;
+    return MemberProfile.fromMap(asStringKeyMap(response));
+  }
 
   Future<List<Map<String, dynamic>>> myAttendance(
     String gymId,

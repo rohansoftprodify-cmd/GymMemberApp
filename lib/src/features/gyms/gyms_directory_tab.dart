@@ -4,6 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:gym_member_app/src/core/data/gyms_repository.dart';
 import 'package:gym_member_app/src/core/theme/app_theme_extensions.dart';
 import 'package:gym_member_app/src/features/gyms/widgets/gym_list_tile.dart';
+import 'package:gym_member_app/src/features/gyms/widgets/gyms_directory_hero.dart';
+import 'package:gym_member_app/src/features/gyms/widgets/gyms_directory_stats.dart';
+import 'package:gym_member_app/src/features/home/widgets/home_section_label.dart';
 
 class GymsDirectoryTab extends ConsumerStatefulWidget {
   const GymsDirectoryTab({
@@ -22,6 +25,8 @@ class GymsDirectoryTab extends ConsumerStatefulWidget {
 class _GymsDirectoryTabState extends ConsumerState<GymsDirectoryTab> {
   final _searchController = TextEditingController();
   String _query = '';
+
+  static const _sectionGap = 18.0;
 
   @override
   void dispose() {
@@ -49,110 +54,130 @@ class _GymsDirectoryTabState extends ConsumerState<GymsDirectoryTab> {
         ),
       ),
       data: (gyms) {
+        final linked = widget.linkedGymId;
         final filtered = gyms.where((g) {
           if (_query.isEmpty) return true;
           final q = _query.toLowerCase();
           final name = (g['name'] as String? ?? '').toLowerCase();
           final address = (g['address'] as String? ?? '').toLowerCase();
-          return name.contains(q) || address.contains(q);
+          final phone = (g['phone'] as String? ?? '').toLowerCase();
+          return name.contains(q) || address.contains(q) || phone.contains(q);
         }).toList();
 
-        final linked = widget.linkedGymId;
+        Map<String, dynamic>? linkedGym;
         if (linked != null) {
-          filtered.sort((a, b) {
-            final aLinked = a['id'] == linked;
-            final bLinked = b['id'] == linked;
-            if (aLinked == bLinked) {
-              return (a['name'] as String? ?? '').compareTo(b['name'] as String? ?? '');
+          for (final g in gyms) {
+            if (g['id'] == linked) {
+              linkedGym = g;
+              break;
             }
-            return aLinked ? -1 : 1;
-          });
+          }
         }
 
-        return ListView(
-          padding: const EdgeInsets.only(bottom: 100, top: 4),
-          children: [
-            if (widget.showSignInBanner) ...[
+        final listGyms = linked == null
+            ? List<Map<String, dynamic>>.from(filtered)
+            : filtered.where((g) => g['id'] != linked).toList();
+
+        listGyms.sort(
+          (a, b) => (a['name'] as String? ?? '').compareTo(b['name'] as String? ?? ''),
+        );
+
+        final showLinkedInResults =
+            linkedGym != null && (_query.isEmpty || filtered.any((g) => g['id'] == linked));
+
+        return RefreshIndicator(
+          onRefresh: () async => ref.invalidate(directoryGymsProvider),
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.only(bottom: 100, top: 4),
+            children: [
+              GymsDirectoryHero(
+                gymCount: gyms.length,
+                showSignInCta: widget.showSignInBanner,
+                onSignIn: widget.showSignInBanner ? () => context.push('/login') : null,
+              ),
+              const SizedBox(height: _sectionGap),
+              GymsDirectoryStats(
+                totalCount: gyms.length,
+                showingCount: filtered.length,
+                hasLinkedGym: linked != null && linkedGym != null,
+              ),
+              const SizedBox(height: _sectionGap),
               Container(
-                padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [colorScheme.primary, colorScheme.secondary],
+                  color: semantics.cardBackground,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.35)),
+                ),
+                child: TextField(
+                  controller: _searchController,
+                  onChanged: (v) => setState(() => _query = v.trim()),
+                  decoration: InputDecoration(
+                    hintText: 'Search name, address, or phone',
+                    prefixIcon: Icon(Icons.search_rounded, color: colorScheme.primary, size: 22),
+                    suffixIcon: _query.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear_rounded, size: 20),
+                            onPressed: () {
+                              _searchController.clear();
+                              setState(() => _query = '');
+                            },
+                          )
+                        : null,
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
                   ),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Discover gyms near you',
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        color: colorScheme.onPrimary,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      'Browse all partner gyms. Sign in when you are a member to check in, track attendance, and more.',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: colorScheme.onPrimary.withValues(alpha: 0.92),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    FilledButton(
-                      style: FilledButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: colorScheme.primary,
-                      ),
-                      onPressed: () => context.push('/login'),
-                      child: const Text('Member sign in'),
-                    ),
-                  ],
                 ),
               ),
-              const SizedBox(height: 16),
-            ],
-            Text(
-              'All gyms (${gyms.length})',
-              style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Tap a gym to view hours, contact, and offers.',
-              style: theme.textTheme.labelSmall?.copyWith(color: semantics.mutedText),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _searchController,
-              onChanged: (v) => setState(() => _query = v.trim()),
-              decoration: InputDecoration(
-                hintText: 'Search by name or address',
-                prefixIcon: const Icon(Icons.search_rounded, size: 20),
-                isDense: true,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              if (showLinkedInResults) ...[
+                const SizedBox(height: _sectionGap),
+                const HomeSectionLabel(title: 'Your gym', icon: Icons.star_rounded),
+                GymListTile(
+                  gym: linkedGym,
+                  isLinkedGym: true,
+                  featured: true,
+                  onTap: () => _openGym(linked!),
+                ),
+              ],
+              const SizedBox(height: _sectionGap),
+              HomeSectionLabel(
+                title: showLinkedInResults ? 'Other gyms' : 'All gyms',
+                icon: Icons.fitness_center_outlined,
               ),
-            ),
-            const SizedBox(height: 12),
-            if (filtered.isEmpty)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 32),
-                child: Center(
+              if (filtered.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 32),
+                  child: Center(
+                    child: Column(
+                      children: [
+                        Icon(Icons.search_off_rounded, size: 40, color: semantics.mutedText),
+                        const SizedBox(height: 12),
+                        Text(
+                          _query.isEmpty ? 'No gyms listed yet.' : 'No gyms match your search.',
+                          style: theme.textTheme.labelMedium?.copyWith(color: semantics.mutedText),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              else if (listGyms.isEmpty && showLinkedInResults)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
                   child: Text(
-                    _query.isEmpty ? 'No gyms listed yet.' : 'No gyms match your search.',
+                    'No other gyms match your search.',
                     style: theme.textTheme.labelMedium?.copyWith(color: semantics.mutedText),
                   ),
-                ),
-              )
-            else
-              ...filtered.map((gym) {
-                final id = gym['id'] as String;
-                return GymListTile(
-                  gym: gym,
-                  isLinkedGym: linked != null && linked == id,
-                  onTap: () => _openGym(id),
-                );
-              }),
-          ],
+                )
+              else
+                ...listGyms.map((gym) {
+                  final id = gym['id'] as String;
+                  return GymListTile(
+                    gym: gym,
+                    onTap: () => _openGym(id),
+                  );
+                }),
+            ],
+          ),
         );
       },
     );
