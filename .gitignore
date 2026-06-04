@@ -1,0 +1,59 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ / VS Code / Cursor
+*.iml
+*.ipr
+*.iws
+.idea/
+.vscode/
+.cursor/
+
+# Flutter/Dart/Pub
+**/doc/api/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+/build/
+/coverage/
+**/ios/Flutter/.last_build_id
+
+# Symbolication / obfuscation
+app.*.symbols
+app.*.map.json
+
+# Android
+/android/app/debug
+/android/app/profile
+/android/app/release
+**/android/**/local.properties
+**/.gradle/
+**/.cxx/
+*.jks
+*.keystore
+key.properties
+
+# Secrets & local config (use --dart-define or config.example.json)
+config.json
+.env
+.env.*
+*.secrets.json
+
+# iOS (see also ios/.gitignore)
+**/ios/Pods/
+**/ios/**/xcuserdata/
+**/ios/**/DerivedData/
