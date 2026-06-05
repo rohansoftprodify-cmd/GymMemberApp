@@ -4,8 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:gym_member_app/src/core/data/gyms_repository.dart';
 import 'package:gym_member_app/src/core/theme/app_theme_extensions.dart';
 import 'package:gym_member_app/src/features/gyms/widgets/gym_list_tile.dart';
-import 'package:gym_member_app/src/features/gyms/widgets/gyms_directory_hero.dart';
-import 'package:gym_member_app/src/features/gyms/widgets/gyms_directory_stats.dart';
 import 'package:gym_member_app/src/features/home/widgets/home_section_label.dart';
 
 class GymsDirectoryTab extends ConsumerStatefulWidget {
@@ -91,23 +89,30 @@ class _GymsDirectoryTabState extends ConsumerState<GymsDirectoryTab> {
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.only(bottom: 100, top: 4),
             children: [
-              GymsDirectoryHero(
-                gymCount: gyms.length,
-                showSignInCta: widget.showSignInBanner,
-                onSignIn: widget.showSignInBanner ? () => context.push('/login') : null,
-              ),
-              const SizedBox(height: _sectionGap),
-              GymsDirectoryStats(
-                totalCount: gyms.length,
-                showingCount: filtered.length,
-                hasLinkedGym: linked != null && linkedGym != null,
-              ),
-              const SizedBox(height: _sectionGap),
+              // GymsDirectoryHero(
+              //   gymCount: gyms.length,
+              //   showSignInCta: widget.showSignInBanner,
+              //   onSignIn: widget.showSignInBanner ? () => context.push('/login') : null,
+              // ),
+              //const SizedBox(height: _sectionGap),
+              // GymsDirectoryStats(
+              //   totalCount: gyms.length,
+              //   showingCount: filtered.length,
+              //   hasLinkedGym: linked != null && linkedGym != null,
+              // ),
+              // const SizedBox(height: _sectionGap),
               Container(
                 decoration: BoxDecoration(
                   color: semantics.cardBackground,
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.35)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: colorScheme.primary.withValues(alpha: 0.04),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
                 child: TextField(
                   controller: _searchController,

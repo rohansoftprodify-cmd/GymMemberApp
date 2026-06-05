@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:gym_member_app/src/core/auth/single_session_provider.dart';
 import 'package:gym_member_app/src/core/tenant/member_context_provider.dart';
+import 'package:gym_member_app/src/core/utils/height_units.dart';
 import 'package:gym_member_app/src/core/tenant/member_profile.dart';
 import 'package:gym_member_app/src/core/tenant/member_profile_provider.dart';
 import 'package:gym_member_app/src/core/theme/app_theme_extensions.dart';
@@ -13,7 +15,6 @@ import 'package:gym_member_app/src/features/profile/widgets/profile_hero_header.
 import 'package:gym_member_app/src/features/profile/widgets/profile_info_section.dart';
 import 'package:gym_member_app/src/features/profile/widgets/profile_stats_row.dart';
 import 'package:intl/intl.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 const _profileSectionGap = 18.0;
 
@@ -52,6 +53,7 @@ class MemberProfilePage extends ConsumerWidget {
           return _ProfileBody(
             profile: profile,
             onRefresh: () async => ref.invalidate(memberProfileProvider),
+            onLogout: () => ref.read(singleSessionServiceProvider).signOutLocally(),
           );
         },
       ),
@@ -60,10 +62,15 @@ class MemberProfilePage extends ConsumerWidget {
 }
 
 class _ProfileBody extends StatelessWidget {
-  const _ProfileBody({required this.profile, required this.onRefresh});
+  const _ProfileBody({
+    required this.profile,
+    required this.onRefresh,
+    required this.onLogout,
+  });
 
   final MemberProfile profile;
   final Future<void> Function() onRefresh;
+  final Future<void> Function() onLogout;
 
   @override
   Widget build(BuildContext context) {
@@ -114,6 +121,8 @@ class _ProfileBody extends StatelessWidget {
                   profile.authEmail != profile.email)
                 ProfileInfoRowData(label: 'Login', value: profile.authEmail!),
               ProfileInfoRowData(label: 'Phone', value: profile.phone ?? '—'),
+              if (_hasText(profile.address))
+                ProfileInfoRowData(label: 'Address', value: profile.address!),
               ProfileInfoRowData(
                 label: 'Birthday',
                 value: _formatDate(profile.dateOfBirth, dateFormat),
@@ -122,6 +131,33 @@ class _ProfileBody extends StatelessWidget {
                 label: 'Emergency',
                 value: profile.emergencyContact ?? '—',
               ),
+              if (profile.weightKg != null)
+                ProfileInfoRowData(
+                  label: 'Weight',
+                  value: '${profile.weightKg!.toStringAsFixed(1)} kg',
+                ),
+              if (profile.heightCm != null)
+                ProfileInfoRowData(
+                  label: 'Height',
+                  value: HeightUnits.formatDisplay(profile.heightCm!),
+                ),
+              if (profile.age != null)
+                ProfileInfoRowData(label: 'Age', value: '${profile.age}'),
+              if (_hasText(profile.gender))
+                ProfileInfoRowData(
+                  label: 'Gender',
+                  value: _genderLabel(profile.gender!),
+                ),
+              if (profile.bmi != null)
+                ProfileInfoRowData(
+                  label: 'BMI',
+                  value: profile.bmi!.toStringAsFixed(1),
+                ),
+              if (_hasText(profile.fitnessGoal))
+                ProfileInfoRowData(
+                  label: 'Goal',
+                  value: _fitnessGoalLabel(profile.fitnessGoal!),
+                ),
             ],
           ),
           const SizedBox(height: 12),
@@ -184,6 +220,11 @@ class _ProfileBody extends StatelessWidget {
           ProfileActionsCard(
             actions: [
               ProfileActionItem(
+                icon: Icons.edit_rounded,
+                label: 'Edit profile',
+                onTap: () => context.push('/profile/edit'),
+              ),
+              ProfileActionItem(
                 icon: Icons.history_rounded,
                 label: 'Attendance history',
                 onTap: () => Navigator.of(context).push(
@@ -209,7 +250,7 @@ class _ProfileBody extends StatelessWidget {
                 icon: Icons.logout_rounded,
                 label: 'Sign out',
                 destructive: true,
-                onTap: () => _logout(context),
+                onTap: () => _logout(context, onLogout),
               ),
             ],
           ),
@@ -239,7 +280,26 @@ class _ProfileBody extends StatelessWidget {
     return '${id.substring(0, 8)}…${id.substring(id.length - 4)}';
   }
 
-  Future<void> _logout(BuildContext context) async {
+  static String _fitnessGoalLabel(String key) {
+    return switch (key) {
+      'weight_loss' => 'Lose weight',
+      'muscle_gain' => 'Build muscle',
+      'healthy' => 'Stay healthy',
+      _ => key,
+    };
+  }
+
+  static String _genderLabel(String key) {
+    return switch (key) {
+      'male' => 'Male',
+      'female' => 'Female',
+      'other' => 'Other',
+      'prefer_not_to_say' => 'Prefer not to say',
+      _ => key,
+    };
+  }
+
+  Future<void> _logout(BuildContext context, Future<void> Function() onLogout) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -258,7 +318,7 @@ class _ProfileBody extends StatelessWidget {
       ),
     );
     if (confirmed != true || !context.mounted) return;
-    await Supabase.instance.client.auth.signOut();
+    await onLogout();
     if (context.mounted) context.go('/explore');
   }
 }

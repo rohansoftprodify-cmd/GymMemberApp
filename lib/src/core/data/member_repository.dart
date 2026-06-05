@@ -1,11 +1,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gym_member_app/src/core/supabase/supabase_client_provider.dart';
 import 'package:gym_member_app/src/core/tenant/member_profile.dart';
+import 'package:gym_member_app/src/features/profile/models/member_profile_edit_data.dart';
+import 'package:gym_member_app/src/features/profile_setup/models/profile_setup_data.dart';
 import 'package:gym_member_app/src/core/utils/json_map.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class MemberRepository {
   MemberRepository(this._client);
+
+  static const productImagesBucket = 'product-images';
 
   final SupabaseClient _client;
 
@@ -13,6 +17,41 @@ class MemberRepository {
     final response = await _client.rpc('get_my_member_profile');
     if (response == null) return null;
     return MemberProfile.fromMap(asStringKeyMap(response));
+  }
+
+  Future<void> saveProfileSetup(ProfileSetupData data) async {
+    await updateMyProfile(MemberProfileEditData(
+      weightKg: data.weightKg,
+      heightCm: data.heightCm,
+      age: data.age,
+      gender: data.gender,
+      fitnessGoal: data.fitnessGoal,
+    ));
+  }
+
+  Future<void> updateMyProfile(MemberProfileEditData data) async {
+    await _client.rpc('update_my_member_profile', params: {
+      'p_phone': data.phone.trim().isEmpty ? null : data.phone.trim(),
+      'p_emergency_contact':
+          data.emergencyContact.trim().isEmpty ? null : data.emergencyContact.trim(),
+      'p_address': data.address.trim().isEmpty ? null : data.address.trim(),
+      'p_date_of_birth': data.dateOfBirth == null
+          ? null
+          : '${data.dateOfBirth!.year.toString().padLeft(4, '0')}-'
+              '${data.dateOfBirth!.month.toString().padLeft(2, '0')}-'
+              '${data.dateOfBirth!.day.toString().padLeft(2, '0')}',
+      'p_weight_kg': data.weightKg,
+      'p_height_cm': data.heightCm,
+      'p_age': data.age,
+      'p_gender': data.gender,
+      'p_fitness_goal': data.fitnessGoal,
+    });
+  }
+
+  Future<void> syncLocalProfileSetupIfNeeded(ProfileSetupData data) async {
+    final profile = await myProfile();
+    if (profile?.profileSetupCompleted == true) return;
+    await saveProfileSetup(data);
   }
 
   Future<List<Map<String, dynamic>>> myAttendance(
@@ -110,7 +149,7 @@ class MemberRepository {
   Future<List<Map<String, dynamic>>> products(String gymId, {String? categoryId}) async {
     var query = _client
         .from('products')
-        .select('id, name, description, price, stock_qty, category_id')
+        .select('id, name, description, price, stock_qty, category_id, image_path')
         .eq('gym_id', gymId)
         .eq('is_active', true);
     if (categoryId != null) {
@@ -118,6 +157,11 @@ class MemberRepository {
     }
     final rows = await query.order('name');
     return rows.cast<Map<String, dynamic>>();
+  }
+
+  String? productImageUrl(String? imagePath) {
+    if (imagePath == null || imagePath.trim().isEmpty) return null;
+    return _client.storage.from(productImagesBucket).getPublicUrl(imagePath.trim());
   }
 }
 

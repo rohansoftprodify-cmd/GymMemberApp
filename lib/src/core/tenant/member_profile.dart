@@ -79,7 +79,16 @@ class MemberProfile {
     this.joinedOn,
     this.dateOfBirth,
     this.emergencyContact,
+    this.address,
     this.notes,
+    this.weightKg,
+    this.heightCm,
+    this.age,
+    this.gender,
+    this.fitnessGoal,
+    this.profileSetupCompleted = false,
+    this.profileUpdatedAt,
+    this.bmi,
     this.subscription,
     required this.attendanceStats,
   });
@@ -97,7 +106,16 @@ class MemberProfile {
   final String? joinedOn;
   final String? dateOfBirth;
   final String? emergencyContact;
+  final String? address;
   final String? notes;
+  final double? weightKg;
+  final double? heightCm;
+  final int? age;
+  final String? gender;
+  final String? fitnessGoal;
+  final bool profileSetupCompleted;
+  final String? profileUpdatedAt;
+  final double? bmi;
   final MemberProfileSubscription? subscription;
   final MemberAttendanceStats attendanceStats;
 
@@ -118,7 +136,16 @@ class MemberProfile {
       joinedOn: map['joined_on'] as String?,
       dateOfBirth: map['date_of_birth'] as String?,
       emergencyContact: map['emergency_contact'] as String?,
+      address: map['address'] as String?,
       notes: map['notes'] as String?,
+      weightKg: (map['weight_kg'] as num?)?.toDouble(),
+      heightCm: (map['height_cm'] as num?)?.toDouble(),
+      age: (map['age'] as num?)?.toInt(),
+      gender: map['gender'] as String?,
+      fitnessGoal: map['fitness_goal'] as String?,
+      profileSetupCompleted: map['profile_setup_completed_at'] != null,
+      profileUpdatedAt: map['profile_updated_at'] as String?,
+      bmi: (map['bmi'] as num?)?.toDouble(),
       subscription: sub is Map
           ? MemberProfileSubscription.fromMap(asStringKeyMap(sub))
           : null,

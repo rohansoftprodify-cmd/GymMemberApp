@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:gym_member_app/src/core/data/member_repository.dart';
+import 'package:gym_member_app/src/core/onboarding/onboarding_prefs.dart';
+import 'package:gym_member_app/src/core/onboarding/profile_setup_gate.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SplashPage extends StatefulWidget {
@@ -19,7 +22,27 @@ class _SplashPageState extends State<SplashPage> {
   Future<void> _boot() async {
     await Future.delayed(const Duration(milliseconds: 900));
     if (!mounted) return;
-    if (Supabase.instance.client.auth.currentSession != null) {
+
+    final onboardingDone = await OnboardingPrefs.isCompleted();
+    if (!mounted) return;
+
+    if (!onboardingDone) {
+      context.go('/onboarding');
+      return;
+    }
+
+    final client = Supabase.instance.client;
+    final showProfileSetup = await ProfileSetupGate.shouldShow(
+      memberRepository: MemberRepository(client),
+    );
+    if (!mounted) return;
+
+    if (showProfileSetup) {
+      context.go('/profile-setup');
+      return;
+    }
+
+    if (client.auth.currentSession != null) {
       context.go('/');
     } else {
       context.go('/explore');

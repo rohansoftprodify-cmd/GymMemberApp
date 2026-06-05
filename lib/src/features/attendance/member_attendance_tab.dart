@@ -123,8 +123,6 @@ class _MemberAttendanceTabState extends ConsumerState<MemberAttendanceTab> {
     final colorScheme = theme.colorScheme;
     final repo = ref.read(memberRepositoryProvider);
     final timeFormat = DateFormat('MMM d · h:mm a');
-    final listFormat = DateFormat('MMM d · h:mm a');
-
     return FutureBuilder<List<dynamic>>(
       key: ValueKey(_reloadToken),
       future: Future.wait<dynamic>([
@@ -226,7 +224,6 @@ class _MemberAttendanceTabState extends ConsumerState<MemberAttendanceTab> {
               const SizedBox(height: _sectionGap),
               HomeRecentAttendanceSection(
                 records: recentRecords,
-                format: listFormat,
                 onViewAll: () => Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (_) => MyAttendancePage(

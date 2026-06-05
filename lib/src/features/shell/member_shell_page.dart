@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:gym_member_app/src/core/auth/single_session_provider.dart';
 import 'package:gym_member_app/src/core/tenant/member_context_provider.dart';
 import 'package:gym_member_app/src/core/theme/app_theme_extensions.dart';
 import 'package:gym_member_app/src/features/attendance/member_attendance_tab.dart';
@@ -57,7 +58,7 @@ class _MemberShellPageState extends ConsumerState<MemberShellPage> {
                     const SizedBox(height: 12),
                     FilledButton(
                       onPressed: () async {
-                        await Supabase.instance.client.auth.signOut();
+                        await ref.read(singleSessionServiceProvider).signOutLocally();
                         if (context.mounted) context.go('/explore');
                       },
                       child: const Text('Back to login'),
@@ -73,6 +74,7 @@ class _MemberShellPageState extends ConsumerState<MemberShellPage> {
           MemberHomeTab(
             member: member,
             onGoToAttendance: () => setState(() => _index = 1),
+            onGoToGyms: () => setState(() => _index = 2),
           ),
           MemberAttendanceTab(member: member),
           MemberGymsTab(member: member),
@@ -122,7 +124,7 @@ class _MemberShellPageState extends ConsumerState<MemberShellPage> {
                     ),
                   );
                   if (shouldLogout != true) return;
-                  await Supabase.instance.client.auth.signOut();
+                  await ref.read(singleSessionServiceProvider).signOutLocally();
                   if (context.mounted) context.go('/explore');
                 },
                 icon: Icon(Icons.logout_rounded, color: colorScheme.primary, size: 22),
