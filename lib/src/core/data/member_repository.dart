@@ -86,18 +86,42 @@ class MemberRepository {
   Future<void> markMyAttendance({
     required String gymId,
     required String action,
+    required double latitude,
+    required double longitude,
   }) async {
     await _client.rpc('member_mark_my_attendance', params: {
       'p_gym_id': gymId,
       'p_action': action,
+      'p_latitude': latitude,
+      'p_longitude': longitude,
     });
+  }
+
+  Future<Map<String, dynamic>> validateCheckInQr(String raw) async {
+    final response = await _client.rpc('validate_gym_check_in_qr', params: {'p_raw': raw});
+    return Map<String, dynamic>.from(response as Map);
+  }
+
+  Future<Map<String, dynamic>> markAttendanceFromQr({
+    required String raw,
+    required String action,
+    required double latitude,
+    required double longitude,
+  }) async {
+    final response = await _client.rpc('member_mark_attendance_from_qr', params: {
+      'p_raw': raw,
+      'p_action': action,
+      'p_latitude': latitude,
+      'p_longitude': longitude,
+    });
+    return Map<String, dynamic>.from(response as Map);
   }
 
   Future<List<Map<String, dynamic>>> activePromotions(String gymId) async {
     final now = DateTime.now().toUtc().toIso8601String();
     final rows = await _client
         .from('promotions')
-        .select('id, title, description, start_at, end_at')
+        .select('id, title, description, start_at, end_at, card_design')
         .eq('gym_id', gymId)
         .eq('is_active', true)
         .lte('start_at', now)

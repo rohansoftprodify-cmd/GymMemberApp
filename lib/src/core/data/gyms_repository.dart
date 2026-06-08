@@ -57,7 +57,7 @@ class GymsRepository {
       final now = DateTime.now().toUtc().toIso8601String();
       final promoRows = await _client
           .from('promotions')
-          .select('id, title, description, end_at')
+          .select('id, title, description, start_at, end_at, card_design')
           .eq('gym_id', gymId)
           .eq('is_active', true)
           .lte('start_at', now)

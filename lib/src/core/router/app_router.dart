@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:gym_member_app/src/features/attendance/check_in_page.dart';
 import 'package:gym_member_app/src/features/auth/login_page.dart';
 import 'package:gym_member_app/src/features/explore/explore_page.dart';
 import 'package:gym_member_app/src/features/gyms/gym_detail_page.dart';
@@ -21,6 +22,16 @@ final appRouter = GoRouter(
     GoRoute(path: '/profile-setup', builder: (_, state) => const ProfileSetupPage()),
     GoRoute(path: '/explore', builder: (_, state) => const ExplorePage()),
     GoRoute(path: '/login', builder: (_, state) => const LoginPage()),
+    GoRoute(
+      path: '/checkin',
+      builder: (_, state) {
+        final gymId = state.uri.queryParameters['gymId'];
+        if (gymId == null || gymId.isEmpty) {
+          return const Scaffold(body: Center(child: Text('Missing gym id')));
+        }
+        return CheckInPage(gymId: gymId);
+      },
+    ),
     GoRoute(
       path: '/gym/:gymId',
       builder: (_, state) {

@@ -19,18 +19,20 @@ class _QrScanPageState extends State<QrScanPage> {
     final raw = capture.barcodes.firstOrNull?.rawValue;
     if (raw == null || raw.isEmpty) return;
 
-    final gymId = gymIdFromAttendanceQr(raw);
-    if (gymId == null) {
+    final payload = checkInQrPayloadFromInput(raw);
+    if (payload == null) {
       _showError('Invalid QR code. Scan the gym attendance QR.');
       return;
     }
+
+    final gymId = gymIdFromAttendanceQr(payload);
     if (gymId != widget.expectedGymId) {
       _showError('This QR belongs to another gym.');
       return;
     }
 
     _handled = true;
-    Navigator.of(context).pop(true);
+    Navigator.of(context).pop(payload);
   }
 
   void _showError(String message) {
@@ -50,7 +52,7 @@ class _QrScanPageState extends State<QrScanPage> {
           Padding(
             padding: const EdgeInsets.all(16),
             child: Text(
-              'Point your camera at the check-in QR displayed at ${attendanceQrPrefix}your-gym-id',
+              'Point your camera at the check-in QR displayed at your gym entrance.',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.labelMedium,
             ),

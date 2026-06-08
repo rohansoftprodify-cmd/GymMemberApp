@@ -1,19 +1,27 @@
 import 'dart:math' as math;
 
+import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 
 class LocationCheckResult {
-  const LocationCheckResult.success(this.distanceMeters)
-      : isSuccess = true,
+  const LocationCheckResult.success({
+    required this.distanceMeters,
+    required this.latitude,
+    required this.longitude,
+  })  : isSuccess = true,
         errorMessage = null;
 
   const LocationCheckResult.failure(this.errorMessage)
       : isSuccess = false,
-        distanceMeters = null;
+        distanceMeters = null,
+        latitude = null,
+        longitude = null;
 
   final bool isSuccess;
   final String? errorMessage;
   final double? distanceMeters;
+  final double? latitude;
+  final double? longitude;
 }
 
 Future<LocationCheckResult> verifyNearGym({
@@ -27,6 +35,24 @@ Future<LocationCheckResult> verifyNearGym({
     );
   }
 
+  try {
+    return await _verifyNearGym(
+      gymLatitude: gymLatitude,
+      gymLongitude: gymLongitude,
+      radiusMeters: radiusMeters,
+    );
+  } on MissingPluginException {
+    return const LocationCheckResult.failure(
+      'Location plugin not loaded. Fully stop and reopen the app, then try again.',
+    );
+  }
+}
+
+Future<LocationCheckResult> _verifyNearGym({
+  required double gymLatitude,
+  required double gymLongitude,
+  required int radiusMeters,
+}) async {
   final serviceEnabled = await Geolocator.isLocationServiceEnabled();
   if (!serviceEnabled) {
     return const LocationCheckResult.failure('Turn on location services to check in at the gym.');
@@ -57,8 +83,13 @@ Future<LocationCheckResult> verifyNearGym({
     );
   }
 
-  return LocationCheckResult.success(distance);
+  return LocationCheckResult.success(
+    distanceMeters: distance,
+    latitude: position.latitude,
+    longitude: position.longitude,
+  );
 }
+
 
 double _distanceMeters(double lat1, double lon1, double lat2, double lon2) {
   const earthRadius = 6371000.0;

@@ -39,7 +39,9 @@ class HomeQuickStatCard extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: (highlighted ? accentColor : colorScheme.primary).withValues(alpha: 0.06),
+            color: (highlighted ? accentColor : colorScheme.primary).withValues(
+              alpha: 0.06,
+            ),
             blurRadius: 8,
             offset: const Offset(0, 3),
           ),
@@ -52,7 +54,9 @@ class HomeQuickStatCard extends StatelessWidget {
           children: [
             Container(
               width: 4,
-              color: highlighted ? accentColor : accentColor.withValues(alpha: 0.35),
+              color: highlighted
+                  ? accentColor
+                  : accentColor.withValues(alpha: 0.35),
             ),
             Expanded(
               child: Padding(
@@ -103,7 +107,10 @@ class HomeQuickStatCard extends StatelessWidget {
                             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             visualDensity: VisualDensity.compact,
                           ),
-                          child: Text(actionLabel!, style: const TextStyle(fontSize: 11)),
+                          child: Text(
+                            actionLabel!,
+                            style: const TextStyle(fontSize: 11),
+                          ),
                         ),
                       ),
                     ],

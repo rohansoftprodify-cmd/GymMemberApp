@@ -4,6 +4,7 @@ import 'package:gym_member_app/src/core/data/member_repository.dart';
 import 'package:gym_member_app/src/core/tenant/member_context_provider.dart';
 import 'package:gym_member_app/src/core/theme/app_theme_extensions.dart';
 import 'package:gym_member_app/src/features/attendance/location_check_service.dart';
+import 'package:gym_member_app/src/features/attendance/check_in_flow.dart';
 import 'package:gym_member_app/src/features/attendance/qr_scan_page.dart';
 import 'package:gym_member_app/src/features/attendance/widgets/attendance_method_card.dart';
 import 'package:gym_member_app/src/features/attendance/widgets/attendance_stats_row.dart';
@@ -30,13 +31,29 @@ class _MemberAttendanceTabState extends ConsumerState<MemberAttendanceTab> {
 
   void _refresh() => setState(() => _reloadToken++);
 
-  Future<void> _performAction(String action) async {
+  Future<void> _pullRefresh() async {
+    final repo = ref.read(memberRepositoryProvider);
+    setState(() => _reloadToken++);
+    await Future.wait<dynamic>([
+      repo.openAttendance(widget.member.gymId, widget.member.memberId),
+      repo.gymInfo(widget.member.gymId),
+      repo.myAttendance(widget.member.gymId, widget.member.memberId, limit: 30),
+    ]);
+  }
+
+  Future<void> _performAction(
+    String action, {
+    required double latitude,
+    required double longitude,
+  }) async {
     if (_busy) return;
     setState(() => _busy = true);
     try {
       await ref.read(memberRepositoryProvider).markMyAttendance(
             gymId: widget.member.gymId,
             action: action,
+            latitude: latitude,
+            longitude: longitude,
           );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -90,20 +107,50 @@ class _MemberAttendanceTabState extends ConsumerState<MemberAttendanceTab> {
     }
 
     final action = open == null ? 'check_in' : 'check_out';
-    await _performAction(action);
+    await _performAction(
+      action,
+      latitude: locationResult.latitude!,
+      longitude: locationResult.longitude!,
+    );
   }
 
-  Future<void> _qrAttendance(Map<String, dynamic>? open) async {
+  Future<void> _qrAttendance(Map<String, dynamic>? gym, Map<String, dynamic>? open) async {
     if (_busy) return;
-    final ok = await Navigator.of(context).push<bool>(
+    final payload = await Navigator.of(context).push<String>(
       MaterialPageRoute(
         builder: (_) => QrScanPage(expectedGymId: widget.member.gymId),
       ),
     );
-    if (ok != true || !mounted) return;
+    if (payload == null || !mounted) return;
 
-    final action = open == null ? 'check_in' : 'check_out';
-    await _performAction(action);
+    setState(() => _busy = true);
+    final lat = (gym?['latitude'] as num?)?.toDouble();
+    final lng = (gym?['longitude'] as num?)?.toDouble();
+    final radius = (gym?['check_in_radius_meters'] as num?)?.toInt() ?? 150;
+
+    final result = await runCheckInFromQrPayload(
+      context: context,
+      ref: ref,
+      qrPayload: payload,
+      memberGymId: widget.member.gymId,
+      memberName: widget.member.fullName,
+      gymName: widget.member.gymName,
+      hasOpenSession: open != null,
+      gymLatitude: lat,
+      gymLongitude: lng,
+      gymRadiusMeters: radius,
+    );
+    if (!mounted) return;
+    setState(() => _busy = false);
+
+    if (result.message != null && result.message != 'Cancelled.') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(result.message!)),
+      );
+    }
+    if (result.success) {
+      _refresh();
+    }
   }
 
   static int _visitsToday(List<Map<String, dynamic>> records) {
@@ -156,7 +203,7 @@ class _MemberAttendanceTabState extends ConsumerState<MemberAttendanceTab> {
         final radius = gym?['check_in_radius_meters'] ?? 150;
 
         return RefreshIndicator(
-          onRefresh: () async => _refresh(),
+          onRefresh: _pullRefresh,
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.only(bottom: 100, top: 4),
@@ -193,9 +240,12 @@ class _MemberAttendanceTabState extends ConsumerState<MemberAttendanceTab> {
               AttendanceMethodCard(
                 icon: Icons.qr_code_scanner_rounded,
                 title: 'Scan QR code',
-                subtitle: 'Scan the QR code displayed at your gym entrance',
+                subtitle: hasCoords
+                    ? 'Scan gym QR — you must be on-site (within ${radius}m)'
+                    : 'Gym location not set — ask staff to configure coordinates',
                 buttonLabel: isCheckedIn ? 'Scan to check out' : 'Scan to check in',
-                onPressed: () => _qrAttendance(open),
+                onPressed: hasCoords ? () => _qrAttendance(gym, open) : null,
+                enabled: hasCoords,
                 loading: _busy,
                 accentColor: colorScheme.secondary,
               ),

@@ -49,5 +49,16 @@
 	<string>Location is used to verify you are at the gym when checking in or out.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Camera is used to scan the gym QR code for attendance.</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>gym.member.checkin</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>gymmember</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>
