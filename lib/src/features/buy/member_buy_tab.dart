@@ -41,7 +41,8 @@ class _MemberBuyTabState extends ConsumerState<MemberBuyTab> {
         final categories = snap.data![0] as List<Map<String, dynamic>>;
         final products = snap.data![1] as List<Map<String, dynamic>>;
         final categoryNames = {
-          for (final c in categories) c['id'] as String: c['name'] as String? ?? '',
+          for (final c in categories)
+            c['id'] as String: c['name'] as String? ?? '',
         };
 
         return RefreshIndicator(
@@ -65,9 +66,7 @@ class _MemberBuyTabState extends ConsumerState<MemberBuyTab> {
                 title: _categoryId == null ? 'All products' : 'Products',
                 icon: Icons.shopping_bag_outlined,
               ),
-              if (products.isEmpty)
-                const ShopEmptyState()
-              else
+              if (products.isNotEmpty)
                 ProductGrid(
                   products: products,
                   categoryNames: categoryNames,

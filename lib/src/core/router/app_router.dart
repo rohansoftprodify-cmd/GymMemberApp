@@ -4,6 +4,8 @@ import 'package:gym_member_app/src/features/attendance/check_in_page.dart';
 import 'package:gym_member_app/src/features/auth/login_page.dart';
 import 'package:gym_member_app/src/features/explore/explore_page.dart';
 import 'package:gym_member_app/src/features/gyms/gym_detail_page.dart';
+import 'package:gym_member_app/src/features/diet/diet_plan_detail_page.dart';
+import 'package:gym_member_app/src/features/diet/member_diet_plans_page.dart';
 import 'package:gym_member_app/src/features/profile/edit_profile_page.dart';
 import 'package:gym_member_app/src/features/profile/member_profile_page.dart';
 import 'package:gym_member_app/src/features/shell/member_shell_page.dart';
@@ -41,6 +43,19 @@ final appRouter = GoRouter(
     ),
     GoRoute(path: '/profile', builder: (_, state) => const MemberProfilePage()),
     GoRoute(path: '/profile/edit', builder: (_, state) => const EditProfilePage()),
+    GoRoute(
+      path: '/profile/diet',
+      builder: (_, state) => const MemberDietPlansPage(),
+      routes: [
+        GoRoute(
+          path: ':dietPlanId',
+          builder: (_, state) {
+            final dietPlanId = state.pathParameters['dietPlanId']!;
+            return DietPlanDetailPage(dietPlanId: dietPlanId);
+          },
+        ),
+      ],
+    ),
     GoRoute(path: '/', builder: (_, state) => const MemberShellPage()),
   ],
 );

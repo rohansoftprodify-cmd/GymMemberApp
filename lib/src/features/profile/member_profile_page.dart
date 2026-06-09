@@ -225,6 +225,11 @@ class _ProfileBody extends StatelessWidget {
                 onTap: () => context.push('/profile/edit'),
               ),
               ProfileActionItem(
+                icon: Icons.restaurant_menu_rounded,
+                label: 'Diet plans',
+                onTap: () => context.push('/profile/diet'),
+              ),
+              ProfileActionItem(
                 icon: Icons.history_rounded,
                 label: 'Attendance history',
                 onTap: () => Navigator.of(context).push(

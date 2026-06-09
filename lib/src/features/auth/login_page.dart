@@ -93,11 +93,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
       final ctx = await client.rpc('get_my_member_context');
       if (ctx == null) {
-        await client.auth.signOut(scope: SignOutScope.local);
+        await ref.read(singleSessionServiceProvider).signOutLocally();
         if (mounted) {
           setState(() {
             _error =
-                'This account is not linked as a gym member. Use credentials from your gym.';
+                'This login is not linked to a gym member record. '
+                'Ask your gym to enable app login for your membership.';
           });
         }
         return;

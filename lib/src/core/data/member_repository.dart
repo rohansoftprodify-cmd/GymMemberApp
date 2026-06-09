@@ -10,6 +10,7 @@ class MemberRepository {
   MemberRepository(this._client);
 
   static const productImagesBucket = 'product-images';
+  static const dietImagesBucket = 'diet-images';
 
   final SupabaseClient _client;
 
@@ -186,6 +187,194 @@ class MemberRepository {
   String? productImageUrl(String? imagePath) {
     if (imagePath == null || imagePath.trim().isEmpty) return null;
     return _client.storage.from(productImagesBucket).getPublicUrl(imagePath.trim());
+  }
+
+  String? dietImageUrl(String? imagePath) {
+    if (imagePath == null || imagePath.trim().isEmpty) return null;
+    return _client.storage.from(dietImagesBucket).getPublicUrl(imagePath.trim());
+  }
+
+  Future<List<Map<String, dynamic>>> myDietPlans() async {
+    try {
+      final response = await _client.rpc('get_my_diet_plans');
+      if (response is List) {
+        return response
+            .whereType<Map>()
+            .map((m) => m.map((k, v) => MapEntry(k.toString(), v)))
+            .toList();
+      }
+    } catch (_) {
+      // RPC may be missing on older databases; fall back to RLS-scoped reads.
+    }
+    return _myDietPlansFallback();
+  }
+
+  Future<Map<String, dynamic>?> myDietPlanDetail(String dietPlanId) async {
+    try {
+      final response = await _client.rpc('get_my_diet_plan_detail', params: {
+        'p_diet_plan_id': dietPlanId,
+      });
+      if (response != null) {
+        final map = tryAsStringKeyMap(response);
+        if (map != null && map['id'] != null) return map;
+      }
+    } catch (_) {
+      // RPC may be missing on older databases; fall back to RLS-scoped reads.
+    }
+    return _myDietPlanDetailFallback(dietPlanId);
+  }
+
+  Future<String?> _myGymId() async {
+    try {
+      final response = await _client.rpc('get_my_member_context');
+      final ctx = tryAsStringKeyMap(response);
+      final gymId = ctx?['gym_id']?.toString();
+      if (gymId != null && gymId.isNotEmpty) return gymId;
+    } catch (_) {}
+
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) return null;
+
+    final row = await _client
+        .from('members')
+        .select('gym_id')
+        .eq('user_id', userId)
+        .limit(1)
+        .maybeSingle();
+    return row?['gym_id']?.toString();
+  }
+
+  Future<List<Map<String, dynamic>>> _myDietPlansFallback() async {
+    final gymId = await _myGymId();
+    if (gymId == null) return [];
+
+    final rows = await _client
+        .from('diet_plans')
+        .select(
+          'id, name, description, image_path, target_calories, target_protein_g, '
+          'target_carbs_g, target_fat_g, hydration_liters, duration_days, '
+          'diet_plan_categories(goal_key, name)',
+        )
+        .eq('gym_id', gymId)
+        .eq('is_active', true)
+        .order('name');
+
+    return rows.map(_mapDietPlanSummaryRow).toList();
+  }
+
+  Map<String, dynamic> _mapDietPlanSummaryRow(Map<String, dynamic> row) {
+    final category = row['diet_plan_categories'];
+    final categoryMap = category is Map
+        ? category.map((k, v) => MapEntry(k.toString(), v))
+        : const <String, dynamic>{};
+
+    return {
+      'id': row['id']?.toString(),
+      'name': row['name'],
+      'description': row['description'],
+      'image_path': row['image_path'],
+      'target_calories': row['target_calories'],
+      'target_protein_g': row['target_protein_g'],
+      'target_carbs_g': row['target_carbs_g'],
+      'target_fat_g': row['target_fat_g'],
+      'hydration_liters': row['hydration_liters'],
+      'duration_days': row['duration_days'],
+      'goal_key': categoryMap['goal_key'],
+      'category_name': categoryMap['name'],
+      'meal_count': 0,
+      'linked_membership_plans': const <String>[],
+    };
+  }
+
+  Future<Map<String, dynamic>?> _myDietPlanDetailFallback(String dietPlanId) async {
+    final gymId = await _myGymId();
+    if (gymId == null) return null;
+
+    final planRow = await _client
+        .from('diet_plans')
+        .select(
+          'id, name, description, image_path, target_calories, target_protein_g, '
+          'target_carbs_g, target_fat_g, hydration_liters, duration_days, '
+          'diet_plan_categories(goal_key, name, nutrition_tips)',
+        )
+        .eq('id', dietPlanId)
+        .eq('gym_id', gymId)
+        .eq('is_active', true)
+        .maybeSingle();
+    if (planRow == null) return null;
+
+    final mealsRaw = await _client
+        .from('diet_meals')
+        .select(
+          'id, meal_label, meal_time, guidance, sort_order, '
+          'diet_food_items(id, food_name, portion, calories, protein_g, carbs_g, fat_g, notes, sort_order)',
+        )
+        .eq('diet_plan_id', dietPlanId)
+        .eq('gym_id', gymId)
+        .order('sort_order');
+
+    final category = planRow['diet_plan_categories'];
+    final categoryMap = category is Map
+        ? category.map((k, v) => MapEntry(k.toString(), v))
+        : const <String, dynamic>{};
+
+    return {
+      'id': planRow['id']?.toString(),
+      'name': planRow['name'],
+      'description': planRow['description'],
+      'image_path': planRow['image_path'],
+      'target_calories': planRow['target_calories'],
+      'target_protein_g': planRow['target_protein_g'],
+      'target_carbs_g': planRow['target_carbs_g'],
+      'target_fat_g': planRow['target_fat_g'],
+      'hydration_liters': planRow['hydration_liters'],
+      'duration_days': planRow['duration_days'],
+      'goal_key': categoryMap['goal_key'],
+      'category_name': categoryMap['name'],
+      'nutrition_tips': categoryMap['nutrition_tips'],
+      'meals': _mapDietMealsForDetail(mealsRaw),
+    };
+  }
+
+  List<Map<String, dynamic>> _mapDietMealsForDetail(List<dynamic> mealsRaw) {
+    final meals = mealsRaw.whereType<Map>().map((meal) {
+      final mealMap = meal.map((k, v) => MapEntry(k.toString(), v));
+      final foodsRaw = mealMap['diet_food_items'];
+      final foods = <Map<String, dynamic>>[];
+      if (foodsRaw is List) {
+        for (final food in foodsRaw) {
+          if (food is Map) {
+            foods.add(food.map((k, v) => MapEntry(k.toString(), v)));
+          }
+        }
+      }
+      foods.sort((a, b) {
+        final aOrder = (a['sort_order'] as num?)?.toInt() ?? 0;
+        final bOrder = (b['sort_order'] as num?)?.toInt() ?? 0;
+        final byOrder = aOrder.compareTo(bOrder);
+        if (byOrder != 0) return byOrder;
+        return (a['food_name'] as String? ?? '').compareTo(b['food_name'] as String? ?? '');
+      });
+
+      return {
+        'id': mealMap['id']?.toString(),
+        'meal_label': mealMap['meal_label'],
+        'meal_time': mealMap['meal_time'],
+        'guidance': mealMap['guidance'],
+        'sort_order': mealMap['sort_order'],
+        'foods': foods,
+      };
+    }).toList();
+
+    meals.sort((a, b) {
+      final aOrder = (a['sort_order'] as num?)?.toInt() ?? 0;
+      final bOrder = (b['sort_order'] as num?)?.toInt() ?? 0;
+      final byOrder = aOrder.compareTo(bOrder);
+      if (byOrder != 0) return byOrder;
+      return (a['meal_label'] as String? ?? '').compareTo(b['meal_label'] as String? ?? '');
+    });
+
+    return meals;
   }
 }
 
