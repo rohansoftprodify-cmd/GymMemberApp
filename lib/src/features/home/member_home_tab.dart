@@ -110,14 +110,14 @@ class _MemberHomeTabState extends ConsumerState<MemberHomeTab> {
                     onTap: () => context.push('/gym/${widget.member.gymId}'),
                   ),
                   HomeQuickAction(
+                    icon: Icons.psychology_rounded,
+                    label: 'AI Coach',
+                    onTap: () => context.push('/fitness-chat'),
+                  ),
+                  HomeQuickAction(
                     icon: Icons.person_outline_rounded,
                     label: 'Profile',
                     onTap: () => context.push('/profile'),
-                  ),
-                  HomeQuickAction(
-                    icon: Icons.storefront_outlined,
-                    label: 'All gyms',
-                    onTap: widget.onGoToGyms ?? () {},
                   ),
                 ],
               ),

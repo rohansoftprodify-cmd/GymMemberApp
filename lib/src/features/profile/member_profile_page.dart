@@ -230,6 +230,21 @@ class _ProfileBody extends StatelessWidget {
                 onTap: () => context.push('/profile/diet'),
               ),
               ProfileActionItem(
+                icon: Icons.sports_gymnastics_rounded,
+                label: 'Workout plans',
+                onTap: () => context.push('/profile/workout'),
+              ),
+              ProfileActionItem(
+                icon: Icons.psychology_rounded,
+                label: 'AI Fitness Coach',
+                onTap: () => context.push('/fitness-chat'),
+              ),
+              ProfileActionItem(
+                icon: Icons.support_agent_outlined,
+                label: 'Gym support',
+                onTap: () => context.push('/support'),
+              ),
+              ProfileActionItem(
                 icon: Icons.history_rounded,
                 label: 'Attendance history',
                 onTap: () => Navigator.of(context).push(

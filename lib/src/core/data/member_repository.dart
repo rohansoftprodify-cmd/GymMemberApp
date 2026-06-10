@@ -3,6 +3,7 @@ import 'package:gym_member_app/src/core/supabase/supabase_client_provider.dart';
 import 'package:gym_member_app/src/core/tenant/member_profile.dart';
 import 'package:gym_member_app/src/features/profile/models/member_profile_edit_data.dart';
 import 'package:gym_member_app/src/features/profile_setup/models/profile_setup_data.dart';
+import 'package:gym_member_app/src/features/support/models/member_support_faq.dart';
 import 'package:gym_member_app/src/core/utils/json_map.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -336,6 +337,180 @@ class MemberRepository {
     };
   }
 
+  Future<List<Map<String, dynamic>>> myWorkoutPlans() async {
+    try {
+      final response = await _client.rpc('get_my_workout_plans');
+      if (response is List) {
+        return response
+            .whereType<Map>()
+            .map((m) => m.map((k, v) => MapEntry(k.toString(), v)))
+            .toList();
+      }
+    } catch (_) {}
+    return _myWorkoutPlansFallback();
+  }
+
+  Future<Map<String, dynamic>?> myWorkoutPlanDetail(String workoutPlanId) async {
+    try {
+      final response = await _client.rpc('get_my_workout_plan_detail', params: {
+        'p_workout_plan_id': workoutPlanId,
+      });
+      if (response != null) {
+        final map = tryAsStringKeyMap(response);
+        if (map != null && map['id'] != null) return map;
+      }
+    } catch (_) {}
+    return _myWorkoutPlanDetailFallback(workoutPlanId);
+  }
+
+  Future<void> logMyWorkoutSession({
+    required String workoutPlanId,
+    required String workoutSessionId,
+    String? notes,
+    bool skipped = false,
+  }) async {
+    await _client.rpc('log_my_workout_session', params: {
+      'p_workout_plan_id': workoutPlanId,
+      'p_workout_session_id': workoutSessionId,
+      'p_notes': notes,
+      'p_skipped': skipped,
+    });
+  }
+
+  Future<Map<String, dynamic>> adjustMyWorkoutPlan({
+    required String gymId,
+    required String workoutPlanId,
+    required String goalKey,
+  }) async {
+    final response = await _client.functions.invoke(
+      'ai-generate-workout-plan',
+      body: {
+        'gym_id': gymId,
+        'goal_key': goalKey,
+        'mode': 'adjust',
+        'workout_plan_id': workoutPlanId,
+      },
+    );
+    final data = response.data;
+    if (response.status != 200 || data is! Map) {
+      throw Exception(
+        data is Map ? data['error']?.toString() ?? 'Adjust failed' : 'Adjust failed',
+      );
+    }
+    return Map<String, dynamic>.from(data);
+  }
+
+  Future<void> applyWorkoutPlanSessions({
+    required String workoutPlanId,
+    required List<dynamic> sessions,
+  }) async {
+    await _client.rpc('apply_workout_plan_sessions', params: {
+      'p_workout_plan_id': workoutPlanId,
+      'p_sessions': sessions,
+    });
+  }
+
+  Future<List<Map<String, dynamic>>> _myWorkoutPlansFallback() async {
+    final gymId = await _myGymId();
+    if (gymId == null) return [];
+    final rows = await _client
+        .from('workout_plans')
+        .select(
+          'id, name, description, duration_weeks, sessions_per_week, experience_level, '
+          'equipment_hint, workout_plan_categories(goal_key, name)',
+        )
+        .eq('gym_id', gymId)
+        .eq('is_active', true)
+        .order('name');
+    return rows.map(_mapWorkoutPlanSummaryRow).toList();
+  }
+
+  Map<String, dynamic> _mapWorkoutPlanSummaryRow(Map<String, dynamic> row) {
+    final category = row['workout_plan_categories'];
+    final categoryMap = category is Map
+        ? category.map((k, v) => MapEntry(k.toString(), v))
+        : const <String, dynamic>{};
+    return {
+      'id': row['id']?.toString(),
+      'name': row['name'],
+      'description': row['description'],
+      'duration_weeks': row['duration_weeks'],
+      'sessions_per_week': row['sessions_per_week'],
+      'experience_level': row['experience_level'],
+      'equipment_hint': row['equipment_hint'],
+      'goal_key': categoryMap['goal_key'],
+      'category_name': categoryMap['name'],
+      'session_count': 0,
+    };
+  }
+
+  Future<Map<String, dynamic>?> _myWorkoutPlanDetailFallback(String workoutPlanId) async {
+    final gymId = await _myGymId();
+    if (gymId == null) return null;
+    final planRow = await _client
+        .from('workout_plans')
+        .select(
+          'id, name, description, duration_weeks, sessions_per_week, experience_level, '
+          'equipment_hint, workout_plan_categories(goal_key, name, coaching_tips)',
+        )
+        .eq('id', workoutPlanId)
+        .eq('gym_id', gymId)
+        .eq('is_active', true)
+        .maybeSingle();
+    if (planRow == null) return null;
+    final sessionsRaw = await _client
+        .from('workout_sessions')
+        .select(
+          'id, day_label, day_number, guidance, sort_order, '
+          'workout_session_exercises(exercise_name, sets, reps, rest_seconds, notes, sort_order)',
+        )
+        .eq('workout_plan_id', workoutPlanId)
+        .eq('gym_id', gymId)
+        .order('sort_order');
+    final category = planRow['workout_plan_categories'];
+    final categoryMap = category is Map
+        ? category.map((k, v) => MapEntry(k.toString(), v))
+        : const <String, dynamic>{};
+    return {
+      'id': planRow['id']?.toString(),
+      'name': planRow['name'],
+      'description': planRow['description'],
+      'duration_weeks': planRow['duration_weeks'],
+      'sessions_per_week': planRow['sessions_per_week'],
+      'experience_level': planRow['experience_level'],
+      'equipment_hint': planRow['equipment_hint'],
+      'goal_key': categoryMap['goal_key'],
+      'category_name': categoryMap['name'],
+      'coaching_tips': categoryMap['coaching_tips'],
+      'sessions': _mapWorkoutSessionsForDetail(sessionsRaw),
+    };
+  }
+
+  List<Map<String, dynamic>> _mapWorkoutSessionsForDetail(List<dynamic> sessionsRaw) {
+    return sessionsRaw.whereType<Map>().map((session) {
+      final sessionMap = session.map((k, v) => MapEntry(k.toString(), v));
+      final exercisesRaw = sessionMap['workout_session_exercises'];
+      final exercises = <Map<String, dynamic>>[];
+      if (exercisesRaw is List) {
+        for (final ex in exercisesRaw) {
+          if (ex is Map) exercises.add(ex.map((k, v) => MapEntry(k.toString(), v)));
+        }
+      }
+      exercises.sort((a, b) {
+        final ao = (a['sort_order'] as num?)?.toInt() ?? 0;
+        final bo = (b['sort_order'] as num?)?.toInt() ?? 0;
+        return ao.compareTo(bo);
+      });
+      return {
+        'id': sessionMap['id']?.toString(),
+        'day_label': sessionMap['day_label'],
+        'day_number': sessionMap['day_number'],
+        'guidance': sessionMap['guidance'],
+        'exercises': exercises,
+      };
+    }).toList();
+  }
+
   List<Map<String, dynamic>> _mapDietMealsForDetail(List<dynamic> mealsRaw) {
     final meals = mealsRaw.whereType<Map>().map((meal) {
       final mealMap = meal.map((k, v) => MapEntry(k.toString(), v));
@@ -375,6 +550,55 @@ class MemberRepository {
     });
 
     return meals;
+  }
+
+  Future<Map<String, dynamic>> getFitnessChatQuota() async {
+    final response = await _client.functions.invoke(
+      'ai-fitness-chat',
+      body: {'mode': 'quota'},
+    );
+    final data = response.data;
+    if (response.status != 200 || data is! Map) {
+      throw Exception(
+        data is Map ? data['error']?.toString() ?? 'Could not load chat quota' : 'Could not load chat quota',
+      );
+    }
+    final quota = data['quota'];
+    if (quota is Map) return Map<String, dynamic>.from(quota);
+    return Map<String, dynamic>.from(data);
+  }
+
+  Future<Map<String, dynamic>> sendFitnessChatMessage({
+    required String message,
+    List<Map<String, String>>? history,
+  }) async {
+    final response = await _client.functions.invoke(
+      'ai-fitness-chat',
+      body: {
+        'message': message,
+        if (history != null && history.isNotEmpty) 'history': history,
+      },
+    );
+    final data = response.data;
+    if (response.status != 200 || data is! Map) {
+      throw Exception(
+        data is Map ? data['error']?.toString() ?? 'Chat failed' : 'Chat failed',
+      );
+    }
+    return Map<String, dynamic>.from(data);
+  }
+
+  Future<List<MemberSupportFaqCategory>> memberSupportFaqs() async {
+    final response = await _client.rpc('get_member_support_faqs');
+    if (response == null) return [];
+
+    final list = response is List ? response : <dynamic>[];
+    return list
+        .whereType<Map>()
+        .map((row) => MemberSupportFaqCategory.fromMap(
+              row.map((k, v) => MapEntry(k.toString(), v)),
+            ))
+        .toList();
   }
 }
 
