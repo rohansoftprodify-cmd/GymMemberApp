@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:gym_member_app/src/core/data/gyms_repository.dart';
 import 'package:gym_member_app/src/core/tenant/member_context_provider.dart';
 import 'package:gym_member_app/src/core/theme/app_theme_extensions.dart';
+import 'package:gym_member_app/src/features/gyms/models/gym_amenity.dart';
+import 'package:gym_member_app/src/features/gyms/widgets/gym_amenities_grid.dart';
 import 'package:gym_member_app/src/features/gyms/widgets/gym_detail_hero.dart';
 import 'package:gym_member_app/src/features/gyms/widgets/gym_weekly_hours_card.dart';
 import 'package:gym_member_app/src/features/home/widgets/home_section_label.dart';
@@ -64,12 +66,15 @@ class GymDetailPage extends ConsumerWidget {
           final todayInfo = todayHoursInfo(hours);
           final gymName = gym['name'] as String? ?? 'Gym';
 
+          final amenities = gymAmenitiesFromKeys(gym['amenities']);
+
           return _GymDetailBody(
             gymId: gymId,
             gym: gym,
             gymName: gymName,
             hours: hours,
             promos: promos,
+            amenities: amenities,
             isLinked: isLinked,
             isLoggedIn: isLoggedIn,
             todayInfo: todayInfo,
@@ -96,6 +101,7 @@ class _GymDetailBody extends StatelessWidget {
     required this.gymName,
     required this.hours,
     required this.promos,
+    required this.amenities,
     required this.isLinked,
     required this.isLoggedIn,
     required this.todayInfo,
@@ -107,6 +113,7 @@ class _GymDetailBody extends StatelessWidget {
   final String gymName;
   final List<Map<String, dynamic>> hours;
   final List<Map<String, dynamic>> promos;
+  final List<GymAmenity> amenities;
   final bool isLinked;
   final bool isLoggedIn;
   final ({String label, bool isOpen}) todayInfo;
@@ -140,6 +147,7 @@ class _GymDetailBody extends StatelessWidget {
             isLinkedGym: isLinked,
             todaySlotLabel: todayInfo.label,
             isOpenToday: todayInfo.isOpen,
+            amenities: amenities,
           ),
           const SizedBox(height: GymDetailPage._sectionGap),
           if (!isLoggedIn) ...[
@@ -203,6 +211,11 @@ class _GymDetailBody extends StatelessWidget {
                 ],
               ),
             ),
+            const SizedBox(height: GymDetailPage._sectionGap),
+          ],
+          if (amenities.isNotEmpty) ...[
+            const HomeSectionLabel(title: 'Facilities', icon: Icons.category_rounded),
+            GymAmenitiesGrid(amenities: amenities),
             const SizedBox(height: GymDetailPage._sectionGap),
           ],
           if (contactRows.isNotEmpty) ...[

@@ -54,14 +54,33 @@ class _MemberShellPageState extends ConsumerState<MemberShellPage> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text('This account is not linked to a gym membership.'),
-                    const SizedBox(height: 12),
+                    Text(
+                      'This account is not linked to a gym membership.',
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Ask your gym to enable app login for your member profile, '
+                      'or sign in with the email your gym registered.',
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: semantics.mutedText,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
                     FilledButton(
+                      onPressed: () => ref.invalidate(memberContextProvider),
+                      child: const Text('Retry'),
+                    ),
+                    const SizedBox(height: 8),
+                    TextButton(
                       onPressed: () async {
                         await ref.read(singleSessionServiceProvider).signOutLocally();
-                        if (context.mounted) context.go('/explore');
+                        ref.invalidate(memberContextProvider);
+                        if (context.mounted) context.go('/login');
                       },
-                      child: const Text('Back to login'),
+                      child: const Text('Sign out'),
                     ),
                   ],
                 ),

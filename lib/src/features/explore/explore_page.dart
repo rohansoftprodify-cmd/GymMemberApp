@@ -15,56 +15,117 @@ class ExplorePage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
-      appBar: AppBar(
-        toolbarHeight: 64,
-        backgroundColor: colorScheme.surface,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        title: Text(
-          'Find a gym',
-          style: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w800,
-            fontSize: 16,
-          ),
-        ),
-        actions: [
-          FilledButton.tonal(
-            onPressed: () => context.push('/login'),
-            child: const Text('Sign in'),
-          ),
-          const SizedBox(width: 12),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: GymsDirectoryTab(showSignInBanner: true),
-      ),
-      bottomNavigationBar: SafeArea(
-        minimum: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: BoxDecoration(
-            color: semantics.cardBackground,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.35)),
-          ),
-          child: Row(
-            children: [
-              Icon(Icons.fitness_center_rounded, color: colorScheme.primary),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  'Already a member? Sign in to check in and manage your plan.',
-                  style: theme.textTheme.labelSmall,
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 8, 0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'FIND A GYM',
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: colorScheme.primary,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1.4,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Explore & compare',
+                          style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
+                        ),
+                      ],
+                    ),
+                  ),
+                  OutlinedButton(
+                    onPressed: () => context.push('/login'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: colorScheme.primary,
+                      side: BorderSide(color: colorScheme.primary, width: 1.5),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    ),
+                    child: const Text('SIGN IN'),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: GymsDirectoryTab(showSignInBanner: true),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+              child: Material(
+                color: semantics.cardBackground,
+                borderRadius: BorderRadius.circular(10),
+                child: InkWell(
+                  onTap: () => context.push('/login'),
+                  borderRadius: BorderRadius.circular(10),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: colorScheme.primary.withValues(alpha: 0.35)),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: colorScheme.primary.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(Icons.badge_outlined, color: colorScheme.primary, size: 22),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'ALREADY A MEMBER?',
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 0.6,
+                                  fontSize: 9,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                'Sign in to check in & manage your plan',
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: semantics.mutedText,
+                                  height: 1.25,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        FilledButton(
+                          onPressed: () => context.push('/login'),
+                          style: FilledButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                            minimumSize: Size.zero,
+                          ),
+                          child: const Text('GO'),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
-              const SizedBox(width: 8),
-              FilledButton(
-                onPressed: () => context.push('/login'),
-                child: const Text('Sign in'),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

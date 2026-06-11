@@ -6,10 +6,11 @@ class ProfileSetupGate {
   ProfileSetupGate._();
 
   static Future<bool> shouldShow({MemberRepository? memberRepository}) async {
-    if (await ProfileSetupPrefs.isCompleted()) return false;
-
     final session = Supabase.instance.client.auth.currentSession;
-    if (session == null || memberRepository == null) return true;
+    // Profile setup runs only after sign-in, when a gym membership is linked.
+    if (session == null || memberRepository == null) return false;
+
+    if (await ProfileSetupPrefs.isCompleted()) return false;
 
     try {
       final profile = await memberRepository.myProfile();

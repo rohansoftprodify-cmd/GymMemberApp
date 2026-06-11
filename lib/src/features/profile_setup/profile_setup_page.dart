@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:gym_member_app/src/core/data/member_repository.dart';
 import 'package:gym_member_app/src/core/utils/height_units.dart';
 import 'package:gym_member_app/src/core/onboarding/profile_setup_prefs.dart';
+import 'package:gym_member_app/src/core/tenant/member_context_provider.dart';
 import 'package:gym_member_app/src/core/tenant/member_profile_provider.dart';
 import 'package:gym_member_app/src/core/theme/app_theme_extensions.dart';
 import 'package:gym_member_app/src/features/profile_setup/models/profile_setup_data.dart';
@@ -133,6 +134,7 @@ class _ProfileSetupPageState extends ConsumerState<ProfileSetupPage> {
 
   void _goNextRoute() {
     if (Supabase.instance.client.auth.currentSession != null) {
+      ref.invalidate(memberContextProvider);
       context.go('/');
     } else {
       context.go('/explore');

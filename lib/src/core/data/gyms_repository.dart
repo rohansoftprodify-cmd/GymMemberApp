@@ -41,7 +41,7 @@ class GymsRepository {
   Future<Map<String, dynamic>?> _directoryGymDetailFallback(String gymId) async {
     final gymRow = await _client
         .from('gyms')
-        .select('id, name, email, phone, address, timezone')
+        .select('id, name, email, phone, address, timezone, amenities')
         .eq('id', gymId)
         .maybeSingle();
     if (gymRow == null) return null;

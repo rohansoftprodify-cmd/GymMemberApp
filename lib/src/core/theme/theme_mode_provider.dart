@@ -8,7 +8,7 @@ ThemeMode themeModeFromStorage(SharedPreferences prefs) {
   return switch (prefs.getString(_prefKey)) {
     'light' => ThemeMode.light,
     'dark' => ThemeMode.dark,
-    _ => ThemeMode.system,
+    _ => ThemeMode.dark,
   };
 }
 

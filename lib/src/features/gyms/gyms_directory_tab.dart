@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:gym_member_app/src/core/data/gyms_repository.dart';
 import 'package:gym_member_app/src/core/theme/app_theme_extensions.dart';
+import 'package:gym_member_app/src/features/gyms/models/gym_amenity.dart';
 import 'package:gym_member_app/src/features/gyms/widgets/gym_list_tile.dart';
+import 'package:gym_member_app/src/features/gyms/widgets/gyms_directory_header.dart';
 import 'package:gym_member_app/src/features/home/widgets/home_section_label.dart';
 
 class GymsDirectoryTab extends ConsumerStatefulWidget {
@@ -23,8 +25,9 @@ class GymsDirectoryTab extends ConsumerStatefulWidget {
 class _GymsDirectoryTabState extends ConsumerState<GymsDirectoryTab> {
   final _searchController = TextEditingController();
   String _query = '';
+  String? _facilityFilter;
 
-  static const _sectionGap = 18.0;
+  static const _sectionGap = 16.0;
 
   @override
   void dispose() {
@@ -36,11 +39,38 @@ class _GymsDirectoryTabState extends ConsumerState<GymsDirectoryTab> {
     GoRouter.of(context).push('/gym/$gymId');
   }
 
+  void _clearQuery() {
+    _searchController.clear();
+    setState(() => _query = '');
+  }
+
+  bool _matchesFilters(Map<String, dynamic> gym) {
+    if (_facilityFilter != null) {
+      final keys = gym['amenities'];
+      final amenityKeys = keys is List ? keys.map((e) => e.toString()).toList() : <String>[];
+      if (!amenityKeys.contains(_facilityFilter)) return false;
+    }
+
+    if (_query.isEmpty) return true;
+
+    final q = _query.toLowerCase();
+    final name = (gym['name'] as String? ?? '').toLowerCase();
+    final address = (gym['address'] as String? ?? '').toLowerCase();
+    final phone = (gym['phone'] as String? ?? '').toLowerCase();
+    final facilityText = gymAmenitiesFromKeys(gym['amenities'])
+        .map((a) => a.label.toLowerCase())
+        .join(' ');
+
+    return name.contains(q) ||
+        address.contains(q) ||
+        phone.contains(q) ||
+        facilityText.contains(q);
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final semantics = context.appColors;
-    final colorScheme = theme.colorScheme;
     final gymsAsync = ref.watch(directoryGymsProvider);
 
     return gymsAsync.when(
@@ -53,14 +83,7 @@ class _GymsDirectoryTabState extends ConsumerState<GymsDirectoryTab> {
       ),
       data: (gyms) {
         final linked = widget.linkedGymId;
-        final filtered = gyms.where((g) {
-          if (_query.isEmpty) return true;
-          final q = _query.toLowerCase();
-          final name = (g['name'] as String? ?? '').toLowerCase();
-          final address = (g['address'] as String? ?? '').toLowerCase();
-          final phone = (g['phone'] as String? ?? '').toLowerCase();
-          return name.contains(q) || address.contains(q) || phone.contains(q);
-        }).toList();
+        final filtered = gyms.where(_matchesFilters).toList();
 
         Map<String, dynamic>? linkedGym;
         if (linked != null) {
@@ -81,60 +104,25 @@ class _GymsDirectoryTabState extends ConsumerState<GymsDirectoryTab> {
         );
 
         final showLinkedInResults =
-            linkedGym != null && (_query.isEmpty || filtered.any((g) => g['id'] == linked));
+            linkedGym != null && (_query.isEmpty && _facilityFilter == null || filtered.any((g) => g['id'] == linked));
 
         return RefreshIndicator(
           onRefresh: () async => ref.invalidate(directoryGymsProvider),
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.only(bottom: 100, top: 4),
+            padding: EdgeInsets.only(bottom: widget.showSignInBanner ? 8 : 100, top: 4),
             children: [
-              // GymsDirectoryHero(
-              //   gymCount: gyms.length,
-              //   showSignInCta: widget.showSignInBanner,
-              //   onSignIn: widget.showSignInBanner ? () => context.push('/login') : null,
-              // ),
-              //const SizedBox(height: _sectionGap),
-              // GymsDirectoryStats(
-              //   totalCount: gyms.length,
-              //   showingCount: filtered.length,
-              //   hasLinkedGym: linked != null && linkedGym != null,
-              // ),
-              // const SizedBox(height: _sectionGap),
-              Container(
-                decoration: BoxDecoration(
-                  color: semantics.cardBackground,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.35)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: colorScheme.primary.withValues(alpha: 0.04),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: TextField(
-                  controller: _searchController,
-                  onChanged: (v) => setState(() => _query = v.trim()),
-                  decoration: InputDecoration(
-                    hintText: 'Search name, address, or phone',
-                    prefixIcon: Icon(Icons.search_rounded, color: colorScheme.primary, size: 22),
-                    suffixIcon: _query.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(Icons.clear_rounded, size: 20),
-                            onPressed: () {
-                              _searchController.clear();
-                              setState(() => _query = '');
-                            },
-                          )
-                        : null,
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-                  ),
-                ),
+              GymsDirectoryHeader(
+                totalCount: gyms.length,
+                showingCount: filtered.length,
+                searchController: _searchController,
+                query: _query,
+                onQueryChanged: (v) => setState(() => _query = v.trim()),
+                onClearQuery: _clearQuery,
+                selectedFacilityKey: _facilityFilter,
+                onFacilitySelected: (key) => setState(() => _facilityFilter = key),
               ),
-              if (showLinkedInResults) ...[
+              if (showLinkedInResults && linkedGym != null) ...[
                 const SizedBox(height: _sectionGap),
                 const HomeSectionLabel(title: 'Your gym', icon: Icons.star_rounded),
                 GymListTile(
@@ -158,7 +146,9 @@ class _GymsDirectoryTabState extends ConsumerState<GymsDirectoryTab> {
                         Icon(Icons.search_off_rounded, size: 40, color: semantics.mutedText),
                         const SizedBox(height: 12),
                         Text(
-                          _query.isEmpty ? 'No gyms listed yet.' : 'No gyms match your search.',
+                          _query.isEmpty && _facilityFilter == null
+                              ? 'No gyms listed yet.'
+                              : 'No gyms match your search.',
                           style: theme.textTheme.labelMedium?.copyWith(color: semantics.mutedText),
                         ),
                       ],
@@ -169,7 +159,7 @@ class _GymsDirectoryTabState extends ConsumerState<GymsDirectoryTab> {
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   child: Text(
-                    'No other gyms match your search.',
+                    'No other gyms match your filters.',
                     style: theme.textTheme.labelMedium?.copyWith(color: semantics.mutedText),
                   ),
                 )

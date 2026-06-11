@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gym_member_app/src/core/theme/app_theme_extensions.dart';
+import 'package:gym_member_app/src/features/gyms/models/gym_amenity.dart';
+import 'package:gym_member_app/src/features/gyms/widgets/gym_amenities_chips.dart';
 
 class GymDetailHero extends StatelessWidget {
   const GymDetailHero({
@@ -8,12 +10,14 @@ class GymDetailHero extends StatelessWidget {
     this.isLinkedGym = false,
     this.todaySlotLabel,
     this.isOpenToday = true,
+    this.amenities = const [],
   });
 
   final String gymName;
   final bool isLinkedGym;
   final String? todaySlotLabel;
   final bool isOpenToday;
+  final List<GymAmenity> amenities;
 
   @override
   Widget build(BuildContext context) {
@@ -80,6 +84,15 @@ class GymDetailHero extends StatelessWidget {
                   ),
               ],
             ),
+            if (amenities.isNotEmpty) ...[
+              const SizedBox(height: 14),
+              GymAmenitiesChips(
+                amenities: amenities,
+                maxVisible: 8,
+                compact: true,
+                inverted: true,
+              ),
+            ],
           ],
         ),
       ),

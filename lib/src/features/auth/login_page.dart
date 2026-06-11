@@ -5,6 +5,7 @@ import 'package:gym_member_app/src/core/auth/single_session_provider.dart';
 import 'package:gym_member_app/src/core/data/member_repository.dart';
 import 'package:gym_member_app/src/core/onboarding/profile_setup_gate.dart';
 import 'package:gym_member_app/src/core/onboarding/profile_setup_prefs.dart';
+import 'package:gym_member_app/src/core/tenant/member_context_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
@@ -75,8 +76,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   }
 
   Future<void> _signIn() async {
-    final confirmed = await _confirmSingleDeviceSignIn();
-    if (!confirmed || !mounted) return;
+    final email = _emailController.text.trim();
+    if (email.isEmpty || _passwordController.text.isEmpty) {
+      setState(() => _error = 'Enter email and password.');
+      return;
+    }
 
     setState(() {
       _loading = true;
@@ -84,10 +88,24 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     });
 
     final client = Supabase.instance.client;
+    final sessionService = ref.read(singleSessionServiceProvider);
 
     try {
+      final hasActiveElsewhere = await sessionService.emailHasActiveSession(email);
+      if (!mounted) return;
+
+      if (hasActiveElsewhere) {
+        setState(() => _loading = false);
+        final confirmed = await _confirmSingleDeviceSignIn();
+        if (!confirmed || !mounted) return;
+        setState(() {
+          _loading = true;
+          _error = null;
+        });
+      }
+
       await client.auth.signInWithPassword(
-        email: _emailController.text.trim(),
+        email: email,
         password: _passwordController.text,
       );
 
@@ -110,8 +128,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
       if (!mounted) return;
 
-      await _showSignedInDialog(hadOtherDevice: hadOtherDevice);
-      if (!mounted) return;
+      if (hadOtherDevice) {
+        await _showSignedInDialog(hadOtherDevice: true);
+        if (!mounted) return;
+      }
 
       final repo = MemberRepository(client);
 
@@ -128,6 +148,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         memberRepository: repo,
       );
       if (!mounted) return;
+
+      ref.invalidate(memberContextProvider);
 
       if (showProfileSetup) {
         context.go('/profile-setup');

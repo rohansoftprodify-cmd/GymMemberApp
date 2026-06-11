@@ -48,34 +48,36 @@ class AppTheme {
         surfaceContainerHighest: Color(0xFFEEF1F3),
       );
 
+  static const Color neonLime = Color(0xFFDFFF00);
+
   static ColorScheme get _wellnessDarkScheme => const ColorScheme(
         brightness: Brightness.dark,
-        primary: wellnessPrimary,
-        onPrimary: wellnessOnPrimary,
-        primaryContainer: Color(0xFF0D4A47),
-        onPrimaryContainer: Color(0xFFB2EBE8),
-        secondary: Color(0xFF7AD9D2),
+        primary: neonLime,
+        onPrimary: Color(0xFF000000),
+        primaryContainer: Color(0xFF2A2A00),
+        onPrimaryContainer: neonLime,
+        secondary: Color(0xFFB8E600),
         onSecondary: Color(0xFF000000),
         secondaryContainer: Color(0xFF252525),
         onSecondaryContainer: darkOnSurface,
-        tertiary: Color(0xFF7AD9D2),
+        tertiary: darkOnSurface,
         onTertiary: Color(0xFF000000),
-        tertiaryContainer: Color(0xFF2A2A2A),
+        tertiaryContainer: Color(0xFF1A1A1A),
         onTertiaryContainer: darkOnSurface,
-        error: Color(0xFFFF6B5B),
-        onError: Color(0xFF000000),
+        error: Color(0xFFFF4D3D),
+        onError: darkOnSurface,
         surface: darkBackground,
         onSurface: darkOnSurface,
-        onSurfaceVariant: _darkOnSurfaceMuted,
-        outline: Color(0xFF3A3A3A),
-        outlineVariant: Color(0xFF2E2E2E),
+        onSurfaceVariant: Color(0xFF888888),
+        outline: Color(0xFF333333),
+        outlineVariant: Color(0xFF2A2A2A),
         shadow: Color(0xFF000000),
         scrim: Color(0xFF000000),
         inverseSurface: darkOnSurface,
         onInverseSurface: darkBackground,
-        inversePrimary: wellnessPrimary,
-        surfaceTint: wellnessPrimary,
-        surfaceContainerHighest: darkSurface,
+        inversePrimary: Color(0xFFB8E600),
+        surfaceTint: neonLime,
+        surfaceContainerHighest: Color(0xFF1A1A1A),
       );
 
   static ThemeData get light => _buildTheme(
@@ -91,8 +93,8 @@ class AppTheme {
         _wellnessDarkScheme,
         scaffoldColor: darkBackground,
         appBarColor: darkBackground,
-        cardColor: darkSurface,
-        navBarColor: darkSurface,
+        cardColor: const Color(0xFF1A1A1A),
+        navBarColor: const Color(0xFF1A1A1A),
         semantics: AppSemanticColors.dark,
       );
 

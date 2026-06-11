@@ -26,7 +26,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
   Future<void> _finish() async {
     await OnboardingPrefs.markCompleted();
     if (!mounted) return;
-    context.go('/profile-setup');
+    context.go('/explore');
   }
 
   void _next() {

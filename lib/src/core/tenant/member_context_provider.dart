@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gym_member_app/src/core/supabase/supabase_client_provider.dart';
 import 'package:gym_member_app/src/core/utils/json_map.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class MemberContext {
   const MemberContext({
@@ -24,10 +25,20 @@ class MemberContext {
   final MemberSubscriptionContext? subscription;
 
   factory MemberContext.fromMap(Map<String, dynamic> map) {
-    final sub = map['subscription'] as Map<String, dynamic>?;
+    final gymId = map['gym_id']?.toString();
+    final memberId = map['member_id']?.toString();
+    if (gymId == null || gymId.isEmpty || memberId == null || memberId.isEmpty) {
+      throw const FormatException('Invalid member context payload.');
+    }
+
+    final subRaw = map['subscription'];
+    final sub = subRaw is Map
+        ? subRaw.map((k, v) => MapEntry(k.toString(), v))
+        : null;
+
     return MemberContext(
-      gymId: map['gym_id'] as String,
-      memberId: map['member_id'] as String,
+      gymId: gymId,
+      memberId: memberId,
       gymName: map['gym_name'] as String? ?? 'Gym',
       fullName: map['full_name'] as String? ?? '',
       email: map['email'] as String?,
@@ -59,7 +70,7 @@ class MemberSubscriptionContext {
 
   factory MemberSubscriptionContext.fromMap(Map<String, dynamic> map) {
     return MemberSubscriptionContext(
-      id: map['id'] as String,
+      id: map['id']?.toString() ?? '',
       planName: map['plan_name'] as String? ?? '-',
       startDate: map['start_date'] as String? ?? '',
       endDate: map['end_date'] as String? ?? '',
@@ -70,11 +81,21 @@ class MemberSubscriptionContext {
   }
 }
 
+final authStateProvider = StreamProvider<AuthState>((ref) {
+  return ref.watch(supabaseClientProvider).auth.onAuthStateChange;
+});
+
 final memberContextProvider = FutureProvider<MemberContext?>((ref) async {
+  ref.watch(authStateProvider);
   final client = ref.watch(supabaseClientProvider);
   if (client.auth.currentUser == null) return null;
 
   final response = await client.rpc('get_my_member_context');
   if (response == null) return null;
-  return MemberContext.fromMap(asStringKeyMap(response));
+
+  try {
+    return MemberContext.fromMap(asStringKeyMap(response));
+  } catch (_) {
+    return null;
+  }
 });
