@@ -20,7 +20,7 @@ class ProfileStatsRow extends StatelessWidget {
         : DateFormat('MMM d').format(DateTime.parse(stats.lastCheckInAt!).toLocal());
 
     return SizedBox(
-      height: 96,
+      height: 82,
       child: Row(
         children: [
           Expanded(
@@ -78,7 +78,7 @@ class _StatTile extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: semantics.cardBackground,
         borderRadius: BorderRadius.circular(14),

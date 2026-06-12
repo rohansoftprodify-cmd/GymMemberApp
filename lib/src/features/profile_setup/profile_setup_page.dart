@@ -152,7 +152,7 @@ class _ProfileSetupPageState extends ConsumerState<ProfileSetupPage> {
           foregroundColor: Colors.black,
           disabledBackgroundColor: Colors.white24,
           shape: const StadiumBorder(),
-          textStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
+          textStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
         ),
         child: _saving
             ? const SizedBox(

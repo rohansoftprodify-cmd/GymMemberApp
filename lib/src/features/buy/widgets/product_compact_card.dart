@@ -1,20 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:gym_member_app/src/core/theme/app_theme_extensions.dart';
 import 'package:gym_member_app/src/features/buy/widgets/product_image.dart';
+import 'package:gym_member_app/src/features/buy/widgets/product_price_display.dart';
 import 'package:gym_member_app/src/features/buy/widgets/product_stock_chip.dart';
 
 class ProductCompactCard extends StatelessWidget {
   const ProductCompactCard({
     super.key,
     required this.name,
-    required this.price,
+    required this.actualPrice,
+    this.offerPrice,
     required this.stockQty,
     this.categoryName,
     this.imageUrl,
   });
 
   final String name;
-  final double price;
+  final double actualPrice;
+  final double? offerPrice;
   final int stockQty;
   final String? categoryName;
   final String? imageUrl;
@@ -78,9 +81,10 @@ class ProductCompactCard extends StatelessWidget {
                   const Spacer(),
                   Row(
                     children: [
-                      Text(
-                        '₹${price.toStringAsFixed(0)}',
-                        style: theme.textTheme.titleSmall?.copyWith(
+                      ProductPriceDisplay(
+                        actualPrice: actualPrice,
+                        offerPrice: offerPrice,
+                        mainStyle: theme.textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.w900,
                           color: colorScheme.primary,
                           fontSize: 13,

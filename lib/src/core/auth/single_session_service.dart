@@ -18,6 +18,7 @@ class SingleSessionService {
   Timer? _pollTimer;
   bool _monitoring = false;
   bool _handlingTakeover = false;
+  bool _signInInProgress = false;
   SessionTakeoverHandler? _onTakeover;
 
   String? get localSessionId => _prefs.getString(_prefsKey);
@@ -43,25 +44,44 @@ class SingleSessionService {
     }
   }
 
+  /// Clears stale local session state before password sign-in so monitoring
+  /// cannot treat the new login as a takeover.
+  Future<void> prepareForSignIn() async {
+    _signInInProgress = true;
+    await stopMonitoring();
+    await _prefs.remove(_prefsKey);
+  }
+
+  void finishSignInAttempt() {
+    _signInInProgress = false;
+  }
+
   /// Claims this device as the active session and signs out other devices.
   /// Returns whether another session existed before this login.
   Future<bool> completeSignInAfterPassword() async {
-    final result = await _client.rpc('claim_active_session');
-    if (result is! Map<String, dynamic>) {
-      throw const AuthException('Failed to register this device session.');
+    _signInInProgress = true;
+    try {
+      await stopMonitoring();
+
+      final result = await _client.rpc('claim_active_session');
+      if (result is! Map<String, dynamic>) {
+        throw const AuthException('Failed to register this device session.');
+      }
+
+      final sessionId = result['session_id'] as String?;
+      if (sessionId == null || sessionId.isEmpty) {
+        throw const AuthException('Failed to register this device session.');
+      }
+
+      final hadPrevious = result['had_previous_session'] as bool? ?? false;
+
+      await _prefs.setString(_prefsKey, sessionId);
+      await _client.auth.signOut(scope: SignOutScope.others);
+      await startMonitoring();
+      return hadPrevious;
+    } finally {
+      _signInInProgress = false;
     }
-
-    final sessionId = result['session_id'] as String?;
-    if (sessionId == null || sessionId.isEmpty) {
-      throw const AuthException('Failed to register this device session.');
-    }
-
-    final hadPrevious = result['had_previous_session'] as bool? ?? false;
-
-    await _client.auth.signOut(scope: SignOutScope.others);
-    await _prefs.setString(_prefsKey, sessionId);
-    await startMonitoring();
-    return hadPrevious;
   }
 
   Future<void> signOutLocally() async {
@@ -130,7 +150,7 @@ class SingleSessionService {
   }
 
   Future<void> _validateOrTakeover() async {
-    if (_handlingTakeover) return;
+    if (_handlingTakeover || _signInInProgress) return;
 
     final user = _client.auth.currentUser;
     final storedSessionId = localSessionId;

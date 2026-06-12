@@ -36,7 +36,7 @@ class SectionHeader extends StatelessWidget {
               '$actionLabel >',
               style: TextStyle(
                 fontWeight: FontWeight.w700,
-                fontSize: 12,
+                fontSize: 11,
                 color: colorScheme.primary,
               ),
             ),

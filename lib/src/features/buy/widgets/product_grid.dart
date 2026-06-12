@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gym_member_app/src/core/data/member_repository.dart';
 import 'package:gym_member_app/src/features/buy/widgets/product_card.dart';
+import 'package:gym_member_app/src/features/buy/widgets/product_price_display.dart';
 
 class ProductGrid extends StatelessWidget {
   const ProductGrid({
@@ -28,14 +29,16 @@ class ProductGrid extends StatelessWidget {
       itemCount: products.length,
       itemBuilder: (context, index) {
         final p = products[index];
-        final price = (p['price'] as num?)?.toDouble() ?? 0;
+        final actualPrice = productActualPrice(p);
+        final offerPrice = productOfferPrice(p);
         final stock = p['stock_qty'] as int? ?? 0;
         final categoryId = p['category_id'] as String?;
         return ProductCard(
           compact: true,
           name: p['name'] as String? ?? '-',
           description: p['description'] as String?,
-          price: price,
+          actualPrice: actualPrice,
+          offerPrice: offerPrice,
           stockQty: stock,
           categoryName: categoryId == null ? null : categoryNames[categoryId],
           imageUrl: repo.productImageUrl(p['image_path'] as String?),

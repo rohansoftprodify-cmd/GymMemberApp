@@ -51,11 +51,11 @@ class _MemberBuyTabState extends ConsumerState<MemberBuyTab> {
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.only(bottom: 100, top: 4),
             children: [
-              ShopHeader(
+             /* ShopHeader(
                 gymName: widget.member.gymName,
                 productCount: products.length,
-              ),
-              const SizedBox(height: 16),
+              ),*/
+              const SizedBox(height: 4),
               ShopCategoryBar(
                 categories: categories,
                 selectedCategoryId: _categoryId,

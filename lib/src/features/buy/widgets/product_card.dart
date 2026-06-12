@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:gym_member_app/src/core/theme/app_theme_extensions.dart';
 import 'package:gym_member_app/src/features/buy/widgets/product_compact_card.dart';
 import 'package:gym_member_app/src/features/buy/widgets/product_image.dart';
+import 'package:gym_member_app/src/features/buy/widgets/product_price_display.dart';
 import 'package:gym_member_app/src/features/buy/widgets/product_stock_chip.dart';
 
 class ProductCard extends StatelessWidget {
   const ProductCard({
     super.key,
     required this.name,
-    required this.price,
+    required this.actualPrice,
+    this.offerPrice,
     required this.stockQty,
     this.description,
     this.imageUrl,
@@ -17,7 +19,8 @@ class ProductCard extends StatelessWidget {
   });
 
   final String name;
-  final double price;
+  final double actualPrice;
+  final double? offerPrice;
   final int stockQty;
   final String? description;
   final String? imageUrl;
@@ -29,7 +32,8 @@ class ProductCard extends StatelessWidget {
     if (compact) {
       return ProductCompactCard(
         name: name,
-        price: price,
+        actualPrice: actualPrice,
+        offerPrice: offerPrice,
         stockQty: stockQty,
         categoryName: categoryName,
         imageUrl: imageUrl,
@@ -100,9 +104,10 @@ class ProductCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 10),
-                    Text(
-                      '₹${price.toStringAsFixed(0)}',
-                      style: theme.textTheme.titleMedium?.copyWith(
+                    ProductPriceDisplay(
+                      actualPrice: actualPrice,
+                      offerPrice: offerPrice,
+                      mainStyle: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w900,
                         color: colorScheme.primary,
                       ),

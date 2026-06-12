@@ -111,17 +111,17 @@ class _MemberShellPageState extends ConsumerState<MemberShellPage> {
               _index == 2 ? 'All gyms' : member.gymName,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w800,
-                fontSize: 16,
+                fontSize: 14,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
             actions: [
-              IconButton(
-                tooltip: 'My profile',
-                onPressed: () => context.push('/profile'),
-                icon: Icon(Icons.person_rounded, color: colorScheme.primary, size: 22),
-              ),
+              // IconButton(
+              //   tooltip: 'My profile',
+              //   onPressed: () => context.push('/profile'),
+              //   icon: Icon(Icons.person_rounded, color: colorScheme.primary, size: 22),
+              // ),
               IconButton(
                 tooltip: 'Sign out',
                 onPressed: () async {

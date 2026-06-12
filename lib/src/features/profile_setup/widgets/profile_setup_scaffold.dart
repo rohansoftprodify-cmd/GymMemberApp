@@ -71,7 +71,7 @@ class ProfileSetupScaffold extends StatelessWidget {
                       title,
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 30,
+                        fontSize: 24,
                         fontWeight: FontWeight.w800,
                         height: 1.15,
                         letterSpacing: -0.4,

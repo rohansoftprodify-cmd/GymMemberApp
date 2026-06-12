@@ -175,7 +175,10 @@ class MemberRepository {
   Future<List<Map<String, dynamic>>> products(String gymId, {String? categoryId}) async {
     var query = _client
         .from('products')
-        .select('id, name, description, price, stock_qty, category_id, image_path')
+        .select(
+          'id, name, description, price, actual_price, offer_price, '
+          'stock_qty, category_id, image_path',
+        )
         .eq('gym_id', gymId)
         .eq('is_active', true);
     if (categoryId != null) {

@@ -36,11 +36,8 @@ class _SingleSessionGuardState extends ConsumerState<SingleSessionGuard>
     }
 
     _authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((data) {
-      final sessionService = ref.read(singleSessionServiceProvider);
-      if (data.session != null) {
-        sessionService.startMonitoring();
-      } else {
-        sessionService.stopMonitoring();
+      if (data.session == null) {
+        ref.read(singleSessionServiceProvider).stopMonitoring();
       }
     });
   }

@@ -15,6 +15,13 @@ class GymsRepository {
 
   final SupabaseClient _client;
 
+  static const String paymentQrBucket = 'gym-payment-qr';
+
+  String? paymentQrImageUrl(String? imagePath) {
+    if (imagePath == null || imagePath.trim().isEmpty) return null;
+    return _client.storage.from(paymentQrBucket).getPublicUrl(imagePath.trim());
+  }
+
   Future<List<Map<String, dynamic>>> listDirectoryGyms() async {
     final rows = await _client.rpc('list_directory_gyms');
     if (rows is! List) return [];

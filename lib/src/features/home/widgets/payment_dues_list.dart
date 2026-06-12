@@ -189,7 +189,7 @@ class _DueCard extends StatelessWidget {
                     '₹${alert.amount.toStringAsFixed(0)}',
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w900,
-                      fontSize: 20,
+                      fontSize: 17,
                     ),
                   ),
                   Text(

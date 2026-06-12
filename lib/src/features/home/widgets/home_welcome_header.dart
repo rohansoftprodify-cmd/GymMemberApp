@@ -75,7 +75,7 @@ class HomeWelcomeHeader extends StatelessWidget {
                       child: Text(
                         initials,
                         style: TextStyle(
-                          fontSize: 20,
+                          fontSize: 17,
                           fontWeight: FontWeight.w900,
                           color: colorScheme.onPrimary,
                           letterSpacing: 0.5,
@@ -100,7 +100,7 @@ class HomeWelcomeHeader extends StatelessWidget {
                             style: theme.textTheme.titleMedium?.copyWith(
                               color: colorScheme.onPrimary,
                               fontWeight: FontWeight.w900,
-                              fontSize: 18,
+                              fontSize: 15,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,

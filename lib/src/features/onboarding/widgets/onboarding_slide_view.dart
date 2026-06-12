@@ -108,7 +108,7 @@ class OnboardingSlideView extends StatelessWidget {
                       slide.quote,
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.72),
-                        fontSize: 14,
+                        fontSize: 13,
                         height: 1.45,
                         fontWeight: FontWeight.w400,
                       ),
@@ -125,7 +125,7 @@ class OnboardingSlideView extends StatelessWidget {
                           elevation: 0,
                           shape: const StadiumBorder(),
                           textStyle: const TextStyle(
-                            fontSize: 16,
+                            fontSize: 14,
                             fontWeight: FontWeight.w800,
                           ),
                         ),

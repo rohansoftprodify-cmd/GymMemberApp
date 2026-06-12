@@ -48,36 +48,34 @@ class AppTheme {
         surfaceContainerHighest: Color(0xFFEEF1F3),
       );
 
-  static const Color neonLime = Color(0xFFDFFF00);
-
   static ColorScheme get _wellnessDarkScheme => const ColorScheme(
         brightness: Brightness.dark,
-        primary: neonLime,
-        onPrimary: Color(0xFF000000),
-        primaryContainer: Color(0xFF2A2A00),
-        onPrimaryContainer: neonLime,
-        secondary: Color(0xFFB8E600),
+        primary: wellnessPrimary,
+        onPrimary: wellnessOnPrimary,
+        primaryContainer: Color(0xFF0D4A47),
+        onPrimaryContainer: Color(0xFFB2EBE8),
+        secondary: Color(0xFF7AD9D2),
         onSecondary: Color(0xFF000000),
         secondaryContainer: Color(0xFF252525),
         onSecondaryContainer: darkOnSurface,
-        tertiary: darkOnSurface,
+        tertiary: Color(0xFF7AD9D2),
         onTertiary: Color(0xFF000000),
-        tertiaryContainer: Color(0xFF1A1A1A),
+        tertiaryContainer: Color(0xFF2A2A2A),
         onTertiaryContainer: darkOnSurface,
-        error: Color(0xFFFF4D3D),
-        onError: darkOnSurface,
+        error: Color(0xFFFF6B5B),
+        onError: Color(0xFF000000),
         surface: darkBackground,
         onSurface: darkOnSurface,
-        onSurfaceVariant: Color(0xFF888888),
-        outline: Color(0xFF333333),
-        outlineVariant: Color(0xFF2A2A2A),
+        onSurfaceVariant: _darkOnSurfaceMuted,
+        outline: Color(0xFF3A3A3A),
+        outlineVariant: Color(0xFF2E2E2E),
         shadow: Color(0xFF000000),
         scrim: Color(0xFF000000),
         inverseSurface: darkOnSurface,
         onInverseSurface: darkBackground,
-        inversePrimary: Color(0xFFB8E600),
-        surfaceTint: neonLime,
-        surfaceContainerHighest: Color(0xFF1A1A1A),
+        inversePrimary: wellnessPrimary,
+        surfaceTint: wellnessPrimary,
+        surfaceContainerHighest: darkSurface,
       );
 
   static ThemeData get light => _buildTheme(
@@ -93,8 +91,8 @@ class AppTheme {
         _wellnessDarkScheme,
         scaffoldColor: darkBackground,
         appBarColor: darkBackground,
-        cardColor: const Color(0xFF1A1A1A),
-        navBarColor: const Color(0xFF1A1A1A),
+        cardColor: darkSurface,
+        navBarColor: darkSurface,
         semantics: AppSemanticColors.dark,
       );
 
@@ -125,7 +123,7 @@ class AppTheme {
         surfaceTintColor: Colors.transparent,
         systemOverlayStyle: isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
         titleTextStyle: TextStyle(
-          fontSize: 18,
+          fontSize: 16,
           fontWeight: FontWeight.w800,
           color: scheme.onSurface,
           letterSpacing: 0.2,
@@ -151,7 +149,7 @@ class AppTheme {
           textStyle: const TextStyle(
             fontWeight: FontWeight.w800,
             letterSpacing: 0.2,
-            fontSize: 13,
+            fontSize: 12,
           ),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
@@ -162,7 +160,7 @@ class AppTheme {
           side: BorderSide(color: scheme.primary, width: 1.2),
           foregroundColor: scheme.primary,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
+          textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 11),
         ),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
@@ -198,7 +196,7 @@ class AppTheme {
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           final selected = states.contains(WidgetState.selected);
           return TextStyle(
-            fontSize: 11,
+            fontSize: 10,
             fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
             letterSpacing: 0.2,
             color: selected ? scheme.primary : scheme.onSurfaceVariant,
@@ -208,7 +206,7 @@ class AppTheme {
           final selected = states.contains(WidgetState.selected);
           return IconThemeData(
             color: selected ? scheme.primary : scheme.onSurfaceVariant,
-            size: 22,
+            size: 20,
           );
         }),
       ),
@@ -258,8 +256,8 @@ class AppTheme {
             ? scheme.surfaceContainerHighest
             : scheme.surfaceContainerHighest.withValues(alpha: 0.6),
         selectedColor: scheme.primary.withValues(alpha: isDark ? 0.22 : 0.14),
-        labelStyle: TextStyle(color: scheme.onSurface, fontSize: 12),
-        secondaryLabelStyle: TextStyle(color: scheme.onSurfaceVariant, fontSize: 12),
+        labelStyle: TextStyle(color: scheme.onSurface, fontSize: 11),
+        secondaryLabelStyle: TextStyle(color: scheme.onSurfaceVariant, fontSize: 11),
         side: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.5)),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
@@ -286,45 +284,45 @@ class AppTheme {
 
   static TextTheme _textTheme(TextTheme base, ColorScheme scheme) {
     return base.copyWith(
-      headlineLarge: base.headlineLarge?.copyWith(fontSize: 28, color: scheme.onSurface),
+      headlineLarge: base.headlineLarge?.copyWith(fontSize: 22, color: scheme.onSurface),
       headlineMedium: base.headlineMedium?.copyWith(
         fontWeight: FontWeight.w800,
         letterSpacing: 0.2,
-        fontSize: 24,
+        fontSize: 20,
         color: scheme.onSurface,
       ),
       titleLarge: base.titleLarge?.copyWith(
         fontWeight: FontWeight.w800,
-        fontSize: 18,
+        fontSize: 16,
         color: scheme.onSurface,
       ),
       titleMedium: base.titleMedium?.copyWith(
         fontWeight: FontWeight.w700,
-        fontSize: 15,
+        fontSize: 13,
         color: scheme.onSurface,
       ),
       titleSmall: base.titleSmall?.copyWith(
         fontWeight: FontWeight.w800,
-        fontSize: 14,
+        fontSize: 12,
         color: scheme.onSurface,
       ),
       bodyLarge: base.bodyLarge?.copyWith(
         height: 1.35,
-        fontSize: 14,
+        fontSize: 13,
         color: scheme.onSurface,
       ),
-      bodyMedium: base.bodyMedium?.copyWith(fontSize: 13, color: scheme.onSurface),
+      bodyMedium: base.bodyMedium?.copyWith(fontSize: 12, color: scheme.onSurface),
       bodySmall: base.bodySmall?.copyWith(
-        fontSize: 11.5,
+        fontSize: 10,
         color: scheme.onSurfaceVariant,
       ),
-      labelLarge: base.labelLarge?.copyWith(fontSize: 12.5, color: scheme.onSurface),
+      labelLarge: base.labelLarge?.copyWith(fontSize: 11, color: scheme.onSurface),
       labelMedium: base.labelMedium?.copyWith(
-        fontSize: 11.5,
+        fontSize: 10,
         color: scheme.onSurfaceVariant,
       ),
       labelSmall: base.labelSmall?.copyWith(
-        fontSize: 10,
+        fontSize: 9,
         color: scheme.onSurfaceVariant,
       ),
     );

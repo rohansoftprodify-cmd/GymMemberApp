@@ -7,6 +7,7 @@ import 'package:gym_member_app/src/core/theme/app_theme_extensions.dart';
 import 'package:gym_member_app/src/features/gyms/models/gym_amenity.dart';
 import 'package:gym_member_app/src/features/gyms/widgets/gym_amenities_grid.dart';
 import 'package:gym_member_app/src/features/gyms/widgets/gym_detail_hero.dart';
+import 'package:gym_member_app/src/features/gyms/widgets/gym_payment_options_section.dart';
 import 'package:gym_member_app/src/features/gyms/widgets/gym_weekly_hours_card.dart';
 import 'package:gym_member_app/src/features/home/widgets/home_section_label.dart';
 import 'package:gym_member_app/src/features/home/widgets/offers_carousel.dart';
@@ -67,6 +68,8 @@ class GymDetailPage extends ConsumerWidget {
           final gymName = gym['name'] as String? ?? 'Gym';
 
           final amenities = gymAmenitiesFromKeys(gym['amenities']);
+          final paymentOptions = _parseMapList(detail['payment_options']);
+          final repo = ref.read(gymsRepositoryProvider);
 
           return _GymDetailBody(
             gymId: gymId,
@@ -75,6 +78,8 @@ class GymDetailPage extends ConsumerWidget {
             hours: hours,
             promos: promos,
             amenities: amenities,
+            paymentOptions: paymentOptions,
+            paymentQrImageUrl: repo.paymentQrImageUrl,
             isLinked: isLinked,
             isLoggedIn: isLoggedIn,
             todayInfo: todayInfo,
@@ -102,6 +107,8 @@ class _GymDetailBody extends StatelessWidget {
     required this.hours,
     required this.promos,
     required this.amenities,
+    required this.paymentOptions,
+    required this.paymentQrImageUrl,
     required this.isLinked,
     required this.isLoggedIn,
     required this.todayInfo,
@@ -114,6 +121,8 @@ class _GymDetailBody extends StatelessWidget {
   final List<Map<String, dynamic>> hours;
   final List<Map<String, dynamic>> promos;
   final List<GymAmenity> amenities;
+  final List<Map<String, dynamic>> paymentOptions;
+  final String? Function(String? path) paymentQrImageUrl;
   final bool isLinked;
   final bool isLoggedIn;
   final ({String label, bool isOpen}) todayInfo;
@@ -224,6 +233,14 @@ class _GymDetailBody extends StatelessWidget {
               title: 'Get in touch',
               icon: Icons.storefront_outlined,
               rows: contactRows,
+            ),
+            const SizedBox(height: GymDetailPage._sectionGap),
+          ],
+          if (paymentOptions.isNotEmpty) ...[
+            const HomeSectionLabel(title: 'Pay at gym', icon: Icons.payments_outlined),
+            GymPaymentOptionsSection(
+              options: paymentOptions,
+              imageUrlForPath: paymentQrImageUrl,
             ),
             const SizedBox(height: GymDetailPage._sectionGap),
           ],

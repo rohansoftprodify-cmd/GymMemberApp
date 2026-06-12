@@ -108,7 +108,7 @@ class ExclusiveOfferCard extends StatelessWidget {
                     style: TextStyle(
                       color: textColor,
                       fontWeight: FontWeight.w900,
-                      fontSize: 18,
+                      fontSize: 15,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,

@@ -10,6 +10,8 @@ import 'package:gym_member_app/src/features/workout/member_workout_plans_page.da
 import 'package:gym_member_app/src/features/workout/workout_plan_detail_page.dart';
 import 'package:gym_member_app/src/features/profile/edit_profile_page.dart';
 import 'package:gym_member_app/src/features/profile/member_profile_page.dart';
+import 'package:gym_member_app/src/features/profile/profile_gym_details_page.dart';
+import 'package:gym_member_app/src/features/profile/profile_personal_details_page.dart';
 import 'package:gym_member_app/src/features/shell/member_shell_page.dart';
 import 'package:gym_member_app/src/features/onboarding/onboarding_page.dart';
 import 'package:gym_member_app/src/features/profile_setup/profile_setup_page.dart';
@@ -49,6 +51,8 @@ final appRouter = GoRouter(
     GoRoute(path: '/fitness-chat', builder: (_, state) => const FitnessChatPage()),
     GoRoute(path: '/profile', builder: (_, state) => const MemberProfilePage()),
     GoRoute(path: '/profile/edit', builder: (_, state) => const EditProfilePage()),
+    GoRoute(path: '/profile/personal', builder: (_, state) => const ProfilePersonalDetailsPage()),
+    GoRoute(path: '/profile/gym', builder: (_, state) => const ProfileGymDetailsPage()),
     GoRoute(
       path: '/profile/diet',
       builder: (_, state) => const MemberDietPlansPage(),

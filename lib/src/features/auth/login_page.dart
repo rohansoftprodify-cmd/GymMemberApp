@@ -34,10 +34,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         icon: const Icon(Icons.devices_rounded),
-        title: const Text('Sign in on this device?'),
+        title: const Text('Already signed in elsewhere'),
         content: const Text(
-          'This account can only be active on one device at a time. '
-          'Signing in here will log out any other device using this account.',
+          'This account is active on another device. '
+          'Signing in here will log out that device.',
         ),
         actions: [
           TextButton(
@@ -52,27 +52,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       ),
     );
     return proceed == true;
-  }
-
-  Future<void> _showSignedInDialog({required bool hadOtherDevice}) async {
-    await showDialog<void>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        icon: const Icon(Icons.check_circle_outline_rounded),
-        title: const Text('Signed in'),
-        content: Text(
-          hadOtherDevice
-              ? 'You are signed in on this device. The other device has been logged out.'
-              : 'You are signed in on this device.',
-        ),
-        actions: [
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Continue'),
-          ),
-        ],
-      ),
-    );
   }
 
   Future<void> _signIn() async {
@@ -104,6 +83,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         });
       }
 
+      await sessionService.prepareForSignIn();
+
       await client.auth.signInWithPassword(
         email: email,
         password: _passwordController.text,
@@ -122,16 +103,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         return;
       }
 
-      final hadOtherDevice = await ref
-          .read(singleSessionServiceProvider)
-          .completeSignInAfterPassword();
+      await ref.read(singleSessionServiceProvider).completeSignInAfterPassword();
 
       if (!mounted) return;
-
-      if (hadOtherDevice) {
-        await _showSignedInDialog(hadOtherDevice: true);
-        if (!mounted) return;
-      }
 
       final repo = MemberRepository(client);
 
@@ -161,6 +135,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     } catch (_) {
       if (mounted) setState(() => _error = 'Unable to sign in.');
     } finally {
+      ref.read(singleSessionServiceProvider).finishSignInAttempt();
       if (mounted) setState(() => _loading = false);
     }
   }

@@ -18,7 +18,7 @@ class ProfileHeroHeader extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -26,66 +26,64 @@ class ProfileHeroHeader extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: colorScheme.primary.withValues(alpha: 0.22),
-            blurRadius: 14,
-            offset: const Offset(0, 5),
+            color: colorScheme.primary.withValues(alpha: 0.18),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 22, 20, 20),
-        child: Column(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: Row(
           children: [
             CircleAvatar(
-              radius: 42,
+              radius: 28,
               backgroundColor: Colors.white.withValues(alpha: 0.22),
               child: Text(
                 initial,
                 style: TextStyle(
-                  fontSize: 34,
+                  fontSize: 22,
                   fontWeight: FontWeight.w900,
                   color: colorScheme.onPrimary,
                 ),
               ),
             ),
-            const SizedBox(height: 14),
-            Text(
-              profile.fullName,
-              style: theme.textTheme.titleLarge?.copyWith(
-                color: colorScheme.onPrimary,
-                fontWeight: FontWeight.w900,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 6),
-            Text(
-              profile.gymName,
-              style: theme.textTheme.labelMedium?.copyWith(
-                color: colorScheme.onPrimary.withValues(alpha: 0.88),
-                fontWeight: FontWeight.w600,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 6,
-              alignment: WrapAlignment.center,
-              children: [
-                _HeroChip(
-                  label: profile.memberStatus.toUpperCase(),
-                  background: isActive
-                      ? Colors.white.withValues(alpha: 0.22)
-                      : Colors.white.withValues(alpha: 0.15),
-                  textColor: colorScheme.onPrimary,
-                ),
-                if (profile.attendanceStats.isCheckedIn)
-                  _HeroChip(
-                    label: 'CHECKED IN',
-                    background: const Color(0xFFD4FF00).withValues(alpha: 0.9),
-                    textColor: Colors.black,
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    profile.fullName,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: colorScheme.onPrimary,
+                      fontWeight: FontWeight.w900,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-              ],
+                  const SizedBox(height: 6),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 4,
+                    children: [
+                      _HeroChip(
+                        label: profile.memberStatus.toUpperCase(),
+                        background: isActive
+                            ? Colors.white.withValues(alpha: 0.22)
+                            : Colors.white.withValues(alpha: 0.15),
+                        textColor: colorScheme.onPrimary,
+                      ),
+                      if (profile.attendanceStats.isCheckedIn)
+                        _HeroChip(
+                          label: 'CHECKED IN',
+                          background: const Color(0xFFD4FF00).withValues(alpha: 0.9),
+                          textColor: Colors.black,
+                        ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -108,18 +106,18 @@ class _HeroChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
         color: background,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
         label,
         style: TextStyle(
           color: textColor,
-          fontSize: 10,
+          fontSize: 9,
           fontWeight: FontWeight.w900,
-          letterSpacing: 0.35,
+          letterSpacing: 0.3,
         ),
       ),
     );

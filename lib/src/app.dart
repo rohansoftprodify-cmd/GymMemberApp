@@ -20,8 +20,16 @@ class GymMemberApp extends ConsumerWidget {
       darkTheme: AppTheme.dark,
       routerConfig: appRouter,
       builder: (context, child) {
-        return DeepLinkListener(
-          child: SingleSessionGuard(child: child ?? const SizedBox.shrink()),
+        final mediaQuery = MediaQuery.of(context);
+        final systemScale = mediaQuery.textScaler.scale(14) / 14;
+
+        return MediaQuery(
+          data: mediaQuery.copyWith(
+            textScaler: TextScaler.linear(systemScale * 0.94),
+          ),
+          child: DeepLinkListener(
+            child: SingleSessionGuard(child: child ?? const SizedBox.shrink()),
+          ),
         );
       },
     );
