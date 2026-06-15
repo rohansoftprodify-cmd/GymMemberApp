@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gym_member_app/src/core/data/member_repository.dart';
 import 'package:gym_member_app/src/core/tenant/member_context_provider.dart';
 import 'package:gym_member_app/src/core/theme/app_theme_extensions.dart';
+import 'package:gym_member_app/src/core/ui/shimmer_placeholders.dart';
 import 'package:gym_member_app/src/features/attendance/location_check_service.dart';
 import 'package:gym_member_app/src/features/attendance/check_in_flow.dart';
 import 'package:gym_member_app/src/features/attendance/qr_scan_page.dart';
@@ -187,7 +188,7 @@ class _MemberAttendanceTabState extends ConsumerState<MemberAttendanceTab> {
           );
         }
         if (!snap.hasData) {
-          return const Center(child: CircularProgressIndicator());
+          return const ShimmerAttendanceTab();
         }
 
         final open = snap.data![0] as Map<String, dynamic>?;
@@ -208,12 +209,12 @@ class _MemberAttendanceTabState extends ConsumerState<MemberAttendanceTab> {
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.only(bottom: 100, top: 4),
             children: [
-              AttendanceStatusHero(
+             /* AttendanceStatusHero(
                 isCheckedIn: isCheckedIn,
                 checkInSince: checkInSince,
                 gymName: widget.member.gymName,
               ),
-              const SizedBox(height: _sectionGap),
+              const SizedBox(height: _sectionGap),*/
               AttendanceStatsRow(
                 totalVisits: allRecords.length,
                 visitsToday: _visitsToday(allRecords),

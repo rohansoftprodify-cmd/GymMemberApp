@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gym_member_app/src/core/data/member_repository.dart';
+import 'package:gym_member_app/src/core/ui/shimmer_placeholders.dart';
 import 'package:gym_member_app/src/core/theme/app_theme_extensions.dart';
 import 'package:gym_member_app/src/features/attendance/widgets/attendance_history_summary.dart';
 import 'package:gym_member_app/src/features/attendance/widgets/attendance_visit_card.dart';
@@ -58,7 +59,7 @@ class _MyAttendancePageState extends ConsumerState<MyAttendancePage> {
         future: _future,
         builder: (context, snap) {
           if (snap.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return const ShimmerAttendanceHistory();
           }
           if (snap.hasError) {
             return Center(

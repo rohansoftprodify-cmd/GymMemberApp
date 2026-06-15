@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gym_member_app/src/core/data/member_repository.dart';
 import 'package:gym_member_app/src/core/tenant/member_context_provider.dart';
+import 'package:gym_member_app/src/core/ui/shimmer_placeholders.dart';
 import 'package:gym_member_app/src/core/theme/app_theme_extensions.dart';
 import 'package:gym_member_app/src/features/home/widgets/home_section_label.dart';
 import 'package:gym_member_app/src/features/workout/member_workout_plans_provider.dart';
@@ -90,7 +91,7 @@ class _WorkoutPlanDetailPageState extends ConsumerState<WorkoutPlanDetailPage> {
         ],
       ),
       body: detailAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const ShimmerDetailPage(),
         error: (e, _) => Center(child: Text(e.toString())),
         data: (plan) {
           if (plan == null) {

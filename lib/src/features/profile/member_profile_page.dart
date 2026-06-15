@@ -5,6 +5,7 @@ import 'package:gym_member_app/src/core/auth/single_session_provider.dart';
 import 'package:gym_member_app/src/core/tenant/member_context_provider.dart';
 import 'package:gym_member_app/src/core/tenant/member_profile.dart';
 import 'package:gym_member_app/src/core/tenant/member_profile_provider.dart';
+import 'package:gym_member_app/src/core/ui/shimmer_placeholders.dart';
 import 'package:gym_member_app/src/core/theme/app_theme_extensions.dart';
 import 'package:gym_member_app/src/features/attendance/my_attendance_page.dart';
 import 'package:gym_member_app/src/features/home/widgets/home_plan_card.dart';
@@ -39,7 +40,7 @@ class MemberProfilePage extends ConsumerWidget {
         ],
       ),
       body: profileAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const ShimmerProfilePage(),
         error: (err, _) => Center(
           child: Padding(
             padding: const EdgeInsets.all(24),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:gym_member_app/src/core/ui/shimmer_placeholders.dart';
 import 'package:gym_member_app/src/core/theme/app_theme_extensions.dart';
 import 'package:gym_member_app/src/features/diet/member_diet_plans_provider.dart';
 import 'package:gym_member_app/src/features/diet/models/member_diet_models.dart';
@@ -37,7 +38,7 @@ class _MemberDietPlansPageState extends ConsumerState<MemberDietPlansPage> {
         ],
       ),
       body: plansAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const ShimmerPlanList(),
         error: (err, _) => Center(
           child: Padding(
             padding: const EdgeInsets.all(24),

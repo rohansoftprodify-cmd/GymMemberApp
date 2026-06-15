@@ -5,6 +5,7 @@ import 'package:gym_member_app/src/core/data/member_repository.dart';
 import 'package:gym_member_app/src/core/utils/height_units.dart';
 import 'package:gym_member_app/src/core/tenant/member_profile.dart';
 import 'package:gym_member_app/src/core/tenant/member_profile_provider.dart';
+import 'package:gym_member_app/src/core/ui/shimmer_placeholders.dart';
 import 'package:gym_member_app/src/core/theme/app_theme_extensions.dart';
 import 'package:gym_member_app/src/features/home/widgets/home_section_label.dart';
 import 'package:gym_member_app/src/features/profile/models/member_profile_edit_data.dart';
@@ -140,7 +141,10 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
     final dateFormat = DateFormat.yMMMd();
 
     return profileAsync.when(
-      loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
+      loading: () => Scaffold(
+        appBar: AppBar(title: const Text('Edit profile')),
+        body: const ShimmerEditProfilePage(),
+      ),
       error: (err, _) => Scaffold(
         appBar: AppBar(title: const Text('Edit profile')),
         body: Center(child: Padding(padding: const EdgeInsets.all(24), child: Text('$err'))),

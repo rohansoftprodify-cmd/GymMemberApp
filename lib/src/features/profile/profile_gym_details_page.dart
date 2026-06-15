@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gym_member_app/src/core/data/gyms_repository.dart';
 import 'package:gym_member_app/src/core/tenant/member_profile.dart';
 import 'package:gym_member_app/src/core/tenant/member_profile_provider.dart';
+import 'package:gym_member_app/src/core/ui/shimmer_placeholders.dart';
 import 'package:gym_member_app/src/core/theme/app_theme_extensions.dart';
 import 'package:gym_member_app/src/features/gyms/models/gym_amenity.dart';
 import 'package:gym_member_app/src/features/gyms/widgets/gym_amenities_grid.dart';
@@ -41,7 +42,7 @@ class ProfileGymDetailsPage extends ConsumerWidget {
         ],
       ),
       body: profileAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const ShimmerProfilePage(),
         error: (err, _) => Center(child: Text(err.toString())),
         data: (profile) {
           if (profile == null) {
@@ -65,7 +66,7 @@ class _GymDetailsBody extends ConsumerWidget {
     final dateFormat = DateFormat.yMMMd();
 
     return detailAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const ShimmerDetailPage(),
       error: (err, _) => Center(child: Text(err.toString())),
       data: (detail) {
         final gymRaw = detail?['gym'];

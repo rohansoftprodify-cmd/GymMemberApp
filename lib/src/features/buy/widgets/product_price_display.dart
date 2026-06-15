@@ -67,3 +67,10 @@ double productActualPrice(Map<String, dynamic> product) {
 double? productOfferPrice(Map<String, dynamic> product) {
   return (product['offer_price'] as num?)?.toDouble();
 }
+
+double productSellingPrice(Map<String, dynamic> product) {
+  final actual = productActualPrice(product);
+  final offer = productOfferPrice(product);
+  if (offer != null && offer > 0 && offer < actual) return offer;
+  return actual;
+}

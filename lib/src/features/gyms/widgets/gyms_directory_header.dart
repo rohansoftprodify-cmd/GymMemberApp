@@ -33,7 +33,7 @@ class GymsDirectoryHeader extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Container(
+        /*Container(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
           decoration: BoxDecoration(
             color: semantics.cardBackground,
@@ -69,7 +69,7 @@ class GymsDirectoryHeader extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 14),*/
         TextField(
           controller: searchController,
           onChanged: onQueryChanged,

@@ -193,6 +193,34 @@ class MemberRepository {
     return _client.storage.from(productImagesBucket).getPublicUrl(imagePath.trim());
   }
 
+  Future<Map<String, dynamic>?> primaryPaymentOption(String gymId) async {
+    final row = await _client
+        .from('gym_payment_options')
+        .select('id, label, upi_id, qr_image_path, is_primary')
+        .eq('gym_id', gymId)
+        .eq('is_active', true)
+        .eq('is_primary', true)
+        .maybeSingle();
+    return row == null ? null : Map<String, dynamic>.from(row);
+  }
+
+  Future<({String orderId, double totalAmount})> createMemberProductOrder(
+    List<Map<String, dynamic>> items,
+  ) async {
+    final result = await _client.rpc(
+      'create_member_product_order',
+      params: {'p_items': items},
+    );
+    if (result is! Map) {
+      throw const PostgrestException(message: 'Failed to place order');
+    }
+    final map = Map<String, dynamic>.from(result);
+    return (
+      orderId: map['order_id'] as String,
+      totalAmount: (map['total_amount'] as num).toDouble(),
+    );
+  }
+
   String? dietImageUrl(String? imagePath) {
     if (imagePath == null || imagePath.trim().isEmpty) return null;
     return _client.storage.from(dietImagesBucket).getPublicUrl(imagePath.trim());

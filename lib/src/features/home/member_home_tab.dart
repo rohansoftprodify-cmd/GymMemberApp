@@ -5,6 +5,7 @@ import 'package:gym_member_app/src/core/data/member_repository.dart';
 import 'package:gym_member_app/src/core/tenant/member_context_provider.dart';
 import 'package:gym_member_app/src/core/tenant/member_profile_provider.dart';
 import 'package:gym_member_app/src/core/theme/app_theme_extensions.dart';
+import 'package:gym_member_app/src/core/ui/shimmer_placeholders.dart';
 import 'package:gym_member_app/src/features/attendance/my_attendance_page.dart';
 import 'package:gym_member_app/src/features/home/widgets/home_check_in_banner.dart';
 import 'package:gym_member_app/src/features/home/widgets/home_plan_card.dart';
@@ -67,7 +68,7 @@ class _MemberHomeTabState extends ConsumerState<MemberHomeTab> {
       future: _loadHomeData(),
       builder: (context, snap) {
         if (!snap.hasData) {
-          return const Center(child: CircularProgressIndicator());
+          return const ShimmerHomeDashboard();
         }
 
         final openRecord = snap.data![0] as Map<String, dynamic>?;

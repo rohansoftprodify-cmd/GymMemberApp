@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:gym_member_app/src/core/data/gyms_repository.dart';
 import 'package:gym_member_app/src/core/tenant/member_context_provider.dart';
+import 'package:gym_member_app/src/core/ui/shimmer_placeholders.dart';
 import 'package:gym_member_app/src/core/theme/app_theme_extensions.dart';
 import 'package:gym_member_app/src/features/gyms/models/gym_amenity.dart';
 import 'package:gym_member_app/src/features/gyms/widgets/gym_amenities_grid.dart';
@@ -44,7 +45,7 @@ class GymDetailPage extends ConsumerWidget {
         ],
       ),
       body: detailAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const ShimmerDetailPage(),
         error: (err, _) => Center(
           child: Padding(
             padding: const EdgeInsets.all(24),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gym_member_app/src/core/data/member_repository.dart';
+import 'package:gym_member_app/src/core/ui/shimmer_placeholders.dart';
 import 'package:gym_member_app/src/core/theme/app_theme_extensions.dart';
 import 'package:gym_member_app/src/features/support/models/member_support_faq.dart';
 
@@ -39,7 +40,7 @@ class _SupportBotPageState extends ConsumerState<SupportBotPage> {
         ],
       ),
       body: faqsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const ShimmerSupportPage(),
         error: (err, _) => Center(
           child: Padding(
             padding: const EdgeInsets.all(24),

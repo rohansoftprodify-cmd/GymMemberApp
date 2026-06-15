@@ -16,6 +16,8 @@ import 'package:gym_member_app/src/features/shell/member_shell_page.dart';
 import 'package:gym_member_app/src/features/onboarding/onboarding_page.dart';
 import 'package:gym_member_app/src/features/profile_setup/profile_setup_page.dart';
 import 'package:gym_member_app/src/features/splash/splash_page.dart';
+import 'package:gym_member_app/src/features/buy/cart_page.dart';
+import 'package:gym_member_app/src/features/buy/checkout_page.dart';
 import 'package:gym_member_app/src/features/fitness_chat/fitness_chat_page.dart';
 import 'package:gym_member_app/src/features/support/support_bot_page.dart';
 
@@ -49,6 +51,8 @@ final appRouter = GoRouter(
     ),
     GoRoute(path: '/support', builder: (_, state) => const SupportBotPage()),
     GoRoute(path: '/fitness-chat', builder: (_, state) => const FitnessChatPage()),
+    GoRoute(path: '/cart', builder: (_, state) => const CartPage()),
+    GoRoute(path: '/checkout', builder: (_, state) => const CheckoutPage()),
     GoRoute(path: '/profile', builder: (_, state) => const MemberProfilePage()),
     GoRoute(path: '/profile/edit', builder: (_, state) => const EditProfilePage()),
     GoRoute(path: '/profile/personal', builder: (_, state) => const ProfilePersonalDetailsPage()),

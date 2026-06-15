@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:gym_member_app/src/core/tenant/member_profile.dart';
 import 'package:gym_member_app/src/core/tenant/member_profile_provider.dart';
+import 'package:gym_member_app/src/core/ui/shimmer_placeholders.dart';
 import 'package:gym_member_app/src/core/theme/app_theme_extensions.dart';
 import 'package:gym_member_app/src/core/utils/height_units.dart';
 import 'package:gym_member_app/src/features/profile/profile_display_utils.dart';
@@ -19,7 +20,7 @@ class ProfilePersonalDetailsPage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Personal details')),
       body: profileAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const ShimmerProfilePage(),
         error: (err, _) => Center(child: Text(err.toString())),
         data: (profile) {
           if (profile == null) {

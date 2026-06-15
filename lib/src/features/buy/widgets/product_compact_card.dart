@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gym_member_app/src/core/theme/app_theme_extensions.dart';
+import 'package:gym_member_app/src/features/buy/widgets/product_cart_controls.dart';
 import 'package:gym_member_app/src/features/buy/widgets/product_image.dart';
 import 'package:gym_member_app/src/features/buy/widgets/product_price_display.dart';
 import 'package:gym_member_app/src/features/buy/widgets/product_stock_chip.dart';
@@ -13,6 +14,10 @@ class ProductCompactCard extends StatelessWidget {
     required this.stockQty,
     this.categoryName,
     this.imageUrl,
+    this.cartQty = 0,
+    this.onAdd,
+    this.onSubtract,
+    this.onRemove,
   });
 
   final String name;
@@ -21,6 +26,10 @@ class ProductCompactCard extends StatelessWidget {
   final int stockQty;
   final String? categoryName;
   final String? imageUrl;
+  final int cartQty;
+  final VoidCallback? onAdd;
+  final VoidCallback? onSubtract;
+  final VoidCallback? onRemove;
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +43,11 @@ class ProductCompactCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: semantics.cardBackground,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.35)),
+        border: Border.all(
+          color: cartQty > 0
+              ? colorScheme.primary.withValues(alpha: 0.45)
+              : colorScheme.outlineVariant.withValues(alpha: 0.35),
+        ),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -79,23 +92,32 @@ class ProductCompactCard extends StatelessWidget {
                     ),
                   ],
                   const Spacer(),
+                  ProductPriceDisplay(
+                    actualPrice: actualPrice,
+                    offerPrice: offerPrice,
+                    mainStyle: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w900,
+                      color: colorScheme.primary,
+                      fontSize: 13,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
                   Row(
                     children: [
-                      ProductPriceDisplay(
-                        actualPrice: actualPrice,
-                        offerPrice: offerPrice,
-                        mainStyle: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w900,
-                          color: colorScheme.primary,
-                          fontSize: 13,
-                        ),
-                      ),
-                      const Spacer(),
                       ProductStockChip(
                         inStock: inStock,
                         stockQty: stockQty,
                         accent: inStock ? colorScheme.primary : semantics.accentCoral,
                         compact: true,
+                      ),
+                      const Spacer(),
+                      ProductCartControls(
+                        qty: cartQty,
+                        inStock: inStock,
+                        canAddMore: cartQty < stockQty,
+                        onAdd: onAdd,
+                        onSubtract: onSubtract,
+                        onRemove: onRemove,
                       ),
                     ],
                   ),

@@ -16,6 +16,10 @@ class ProductCard extends StatelessWidget {
     this.imageUrl,
     this.categoryName,
     this.compact = false,
+    this.cartQty = 0,
+    this.onAdd,
+    this.onSubtract,
+    this.onRemove,
   });
 
   final String name;
@@ -26,6 +30,10 @@ class ProductCard extends StatelessWidget {
   final String? imageUrl;
   final String? categoryName;
   final bool compact;
+  final int cartQty;
+  final VoidCallback? onAdd;
+  final VoidCallback? onSubtract;
+  final VoidCallback? onRemove;
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +45,10 @@ class ProductCard extends StatelessWidget {
         stockQty: stockQty,
         categoryName: categoryName,
         imageUrl: imageUrl,
+        cartQty: cartQty,
+        onAdd: onAdd,
+        onSubtract: onSubtract,
+        onRemove: onRemove,
       );
     }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:gym_member_app/src/core/ui/shimmer_placeholders.dart';
 import 'package:gym_member_app/src/core/theme/app_theme_extensions.dart';
 import 'package:gym_member_app/src/features/home/widgets/home_section_label.dart';
 import 'package:gym_member_app/src/features/workout/member_workout_plans_provider.dart';
@@ -26,7 +27,7 @@ class MemberWorkoutPlansPage extends ConsumerWidget {
         ],
       ),
       body: plansAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const ShimmerPlanList(),
         error: (e, _) => Center(child: Text(e.toString())),
         data: (plans) {
           if (plans.isEmpty) {

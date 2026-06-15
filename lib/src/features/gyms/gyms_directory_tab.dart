@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:gym_member_app/src/core/data/gyms_repository.dart';
 import 'package:gym_member_app/src/core/theme/app_theme_extensions.dart';
+import 'package:gym_member_app/src/core/ui/shimmer_placeholders.dart';
 import 'package:gym_member_app/src/features/gyms/models/gym_amenity.dart';
 import 'package:gym_member_app/src/features/gyms/widgets/gym_list_tile.dart';
 import 'package:gym_member_app/src/features/gyms/widgets/gyms_directory_header.dart';
@@ -74,7 +75,7 @@ class _GymsDirectoryTabState extends ConsumerState<GymsDirectoryTab> {
     final gymsAsync = ref.watch(directoryGymsProvider);
 
     return gymsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const ShimmerGymsDirectory(),
       error: (err, _) => Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
