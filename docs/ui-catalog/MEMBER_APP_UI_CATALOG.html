@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Gym Member App — UI Screen Catalog</title>
+  <link rel="stylesheet" href="ui-catalog.css" />
+</head>
+<body>
+
+<section class="cover">
+  <h1>Gym Member App</h1>
+  <p class="subtitle">Complete UI screen catalog for redesign planning.<br/>Wireframe layouts based on current Flutter implementation.</p>
+  <p class="meta">Generated June 2026 · 22 screens · Route map included</p>
+</section>
+
+<section class="toc">
+  <h2>Table of contents</h2>
+  <ol>
+    <li>Navigation flow</li>
+    <li>Design tokens</li>
+    <li>01 Splash</li>
+    <li>02–04 Onboarding (3 slides)</li>
+    <li>05 Profile setup (4 steps)</li>
+    <li>06 Explore (pre-login)</li>
+    <li>07 Login</li>
+    <li>08 Shell — Home tab</li>
+    <li>09 Shell — Attendance tab</li>
+    <li>10 Shell — Gyms tab</li>
+    <li>11 Shell — Buy tab</li>
+    <li>12 My profile</li>
+    <li>13 Edit profile</li>
+    <li>14 Diet plans list</li>
+    <li>15 Diet plan detail</li>
+    <li>16 Workout plans list</li>
+    <li>17 Workout plan detail</li>
+    <li>18 AI Fitness Coach</li>
+    <li>19 Gym support (FAQ bot)</li>
+    <li>20 Gym detail</li>
+    <li>21 Check-in (deep link)</li>
+    <li>22 QR scan &amp; Attendance history</li>
+  </ol>
+</section>
+
+<section class="flow-diagram">
+  <h2 class="section-title">Navigation flow</h2>
+  <pre>
+Splash ──► Onboarding (first launch) ──► Profile setup ──► Main shell (/)
+                │                              │
+                └── skip ──────────────────────┘
+Explore ◄── not logged in          Login ◄── Sign in from Explore
+   │                                    │
+   └── Gym detail                      └── Main shell (/)
+
+Main shell bottom nav:  Home | Attendance | Gyms | Buy
+App bar actions: Profile icon, Logout
+
+From Home / Profile:
+  /profile          /profile/edit       /profile/diet
+  /profile/workout  /fitness-chat       /support
+  /gym/:gymId       /checkin?gymId=
+  </pre>
+
+  <div class="legend">
+    <span class="c-primary">Primary #20B2AA</span>
+    <span class="c-accent">Accent lime #D4FF00</span>
+    <span class="c-card">Card surface #FFFFFF</span>
+    <span class="c-muted">Muted / background #F8F9FA</span>
+  </div>
+</section>
+
+<section>
+  <h2 class="section-title">Design tokens (current)</h2>
+  <p><strong>Typography:</strong> Material 3 theme — titleMedium w800 for app titles, labelSmall for chips, bodyMedium for content.</p>
+  <p><strong>Spacing:</strong> Screen horizontal padding 16px · Section gap 18–20px · Card radius 14–16px · Bottom nav margin 16px.</p>
+  <p><strong>Components:</strong> HomeSectionLabel, HomeQuickActions, HomePlanCard, ProfileActionsCard, DietPlanCard, AttendanceMethodCard.</p>
+</section>
+
+<!-- 01 SPLASH -->
+<section class="page-break">
+  <h2 class="section-title">01 · Splash</h2>
+  <p class="screen-meta"><span class="tag auth">Auth flow</span> Route: <code>/splash</code> · Auto-routes after 900ms</p>
+  <div class="screen-row">
+    <div class="phone">
+      <div class="phone-notch"></div>
+      <div class="phone-body gradient" style="min-height:95mm;justify-content:center;align-items:center;">
+        <div class="block icon-box" style="width:20pt;height:20pt;margin:0 auto 6pt;"></div>
+        <div class="block" style="background:transparent;border:none;color:#fff;font-weight:900;text-align:center;">GYM MEMBER</div>
+      </div>
+    </div>
+    <div class="screen-notes">
+      <h3 class="screen-name">Full-screen gradient splash</h3>
+      <ul>
+        <li>Gradient: primary → secondary (teal)</li>
+        <li>Centered dumbbell icon + “GYM MEMBER” wordmark</li>
+        <li>No buttons — boots to onboarding, profile setup, explore, or home</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 02-04 ONBOARDING -->
+<section>
+  <h2 class="section-title">02–04 · Onboarding slides</h2>
+  <p class="screen-meta"><span class="tag auth">Auth flow</span> Route: <code>/onboarding</code> · PageView · 3 slides</p>
+  <div class="screen-row">
+    <div class="phone">
+      <div class="phone-notch"></div>
+      <div class="phone-body dark short">
+        <div class="block image" style="flex:1;">Full-bleed photo</div>
+        <div class="block" style="background:#111;color:#fff;border:none;">No Excuses / Just Do The</div>
+        <div class="block accent">Workout</div>
+        <div class="block muted" style="font-size:4pt;">Quote text</div>
+        <div class="block row"><span class="block chip">● ○ ○</span><span class="block chip">Skip</span></div>
+        <div class="block primary" style="text-align:center;">Next / Get started</div>
+      </div>
+    </div>
+    <div class="phone">
+      <div class="phone-notch"></div>
+      <div class="phone-body dark short">
+        <div class="block image" style="flex:1;">Slide 2 image</div>
+        <div class="block" style="background:#111;color:#fff;border:none;">Track Your / Progress</div>
+        <div class="block accent">Every Day</div>
+        <div class="block muted">Consistency quote</div>
+        <div class="block primary" style="text-align:center;">Next</div>
+      </div>
+    </div>
+    <div class="phone">
+      <div class="phone-notch"></div>
+      <div class="phone-body dark short">
+        <div class="block image" style="flex:1;">Slide 3 image</div>
+        <div class="block" style="background:#111;color:#fff;border:none;">Explore Gyms / Check In</div>
+        <div class="block accent">Anytime</div>
+        <div class="block primary" style="text-align:center;">Get started</div>
+      </div>
+    </div>
+    <div class="screen-notes">
+      <h3 class="screen-name">Immersive onboarding</h3>
+      <ul>
+        <li>Black background, full-screen images (slide_1–3.jpg)</li>
+        <li>Headline split across 2 lines + lime accent line</li>
+        <li>Page indicators, Skip, primary CTA at bottom</li>
+        <li>Completes → profile setup</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 05 PROFILE SETUP -->
+<section class="page-break">
+  <h2 class="section-title">05 · Profile setup</h2>
+  <p class="screen-meta"><span class="tag auth">Auth flow</span> Route: <code>/profile-setup</code> · 4-step PageView</p>
+  <div class="screen-row">
+    <div class="phone">
+      <div class="phone-notch"></div>
+      <div class="phone-appbar">Setup · Step 1/4</div>
+      <div class="phone-body">
+        <div class="block hero">Weight</div>
+        <div class="block row"><span class="block chip primary">kg</span><span class="block chip">lb</span></div>
+        <div class="block muted" style="min-height:24pt;text-align:center;">Ruler value picker</div>
+        <div class="block primary" style="text-align:center;margin-top:auto;">Continue</div>
+      </div>
+    </div>
+    <div class="phone">
+      <div class="phone-notch"></div>
+      <div class="phone-appbar">Step 2/4 — Height</div>
+      <div class="phone-body">
+        <div class="block row"><span class="block chip primary">cm</span><span class="block chip">ft/in</span></div>
+        <div class="block muted" style="min-height:24pt;">Ruler picker</div>
+        <div class="block primary" style="text-align:center;">Continue</div>
+      </div>
+    </div>
+    <div class="phone">
+      <div class="phone-notch"></div>
+      <div class="phone-appbar">Step 3/4 — Age &amp; gender</div>
+      <div class="phone-body">
+        <div class="block">Age number field</div>
+        <div class="block row"><span class="block">Male</span><span class="block">Female</span><span class="block">Other</span></div>
+        <div class="block primary" style="text-align:center;">Continue</div>
+      </div>
+    </div>
+    <div class="phone">
+      <div class="phone-notch"></div>
+      <div class="phone-appbar">Step 4/4 — Fitness goal</div>
+      <div class="phone-body">
+        <div class="block list-item"><span class="block icon-box"></span>Lose weight</div>
+        <div class="block list-item"><span class="block icon-box"></span>Build muscle</div>
+        <div class="block list-item"><span class="block icon-box"></span>Stay healthy</div>
+        <div class="block primary" style="text-align:center;">Finish</div>
+      </div>
+    </div>
+    <div class="screen-notes">
+      <h3 class="screen-name">Multi-step wizard</h3>
+      <ul>
+        <li>ProfileSetupScaffold with progress indicator</li>
+        <li>RulerValuePicker for weight/height</li>
+        <li>FitnessGoalList selectable cards</li>
+        <li>Saves to member profile + prefs</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 06 EXPLORE -->
+<section>
+  <h2 class="section-title">06 · Explore (pre-login)</h2>
+  <p class="screen-meta"><span class="tag auth">Auth flow</span> Route: <code>/explore</code></p>
+  <div class="screen-row">
+    <div class="phone">
+      <div class="phone-notch"></div>
+      <div class="phone-appbar">Find a gym <span class="actions"><span class="block chip">Sign in</span></span></div>
+      <div class="phone-body">
+        <div class="block hero">Gyms directory hero</div>
+        <div class="block row"><span class="block chip">All</span><span class="block chip">Nearby</span></div>
+        <div class="block list-item"><span class="block icon-box"></span>Gym list tile</div>
+        <div class="block list-item"><span class="block icon-box"></span>Gym list tile</div>
+        <div class="block list-item"><span class="block icon-box"></span>Gym list tile</div>
+      </div>
+      <div class="phone-banner">Already a member? <strong>Sign in</strong></div>
+    </div>
+    <div class="screen-notes">
+      <h3 class="screen-name">Public gym browser</h3>
+      <ul>
+        <li>Reuses GymsDirectoryTab with sign-in banner</li>
+        <li>App bar “Sign in” + bottom CTA bar</li>
+        <li>Tap gym → /gym/:gymId (no check-in without login)</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 07 LOGIN -->
+<section>
+  <h2 class="section-title">07 · Login</h2>
+  <p class="screen-meta"><span class="tag auth">Auth flow</span> Route: <code>/login</code></p>
+  <div class="screen-row">
+    <div class="phone">
+      <div class="phone-notch"></div>
+      <div class="phone-appbar">← Sign in</div>
+      <div class="phone-body tall">
+        <div class="block hero" style="min-height:20pt;">Welcome back</div>
+        <div class="block muted">Email</div>
+        <div class="block input">email@example.com</div>
+        <div class="block muted">Password</div>
+        <div class="block input">•••••••• 👁</div>
+        <div class="block coral">Error message (if any)</div>
+        <div class="block primary" style="text-align:center;">Sign in</div>
+        <div class="block muted" style="text-align:center;">Single-device dialog on submit</div>
+      </div>
+    </div>
+    <div class="screen-notes">
+      <h3 class="screen-name">Email/password login</h3>
+      <ul>
+        <li>Single-session confirmation dialog</li>
+        <li>Success dialog → profile setup gate → home</li>
+        <li>Validates member record via get_my_member_context</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 08 HOME -->
+<section class="page-break">
+  <h2 class="section-title">08 · Shell — Home tab</h2>
+  <p class="screen-meta"><span class="tag shell">Main shell</span> Route: <code>/</code> tab 0 · Pull to refresh</p>
+  <div class="screen-row">
+    <div class="phone">
+      <div class="phone-notch"></div>
+      <div class="phone-appbar">{Gym name} <span class="actions"><span class="dot"></span><span class="dot"></span></span></div>
+      <div class="phone-body tall">
+        <div class="block hero">Welcome header — avatar, name, goal, visits</div>
+        <div class="grid-2">
+          <div class="block" style="text-align:center;">Attendance</div>
+          <div class="block" style="text-align:center;">My gym</div>
+          <div class="block" style="text-align:center;">AI Coach</div>
+          <div class="block" style="text-align:center;">Profile</div>
+        </div>
+        <div class="block muted" style="font-weight:700;">Today</div>
+        <div class="block row">
+          <div class="block">Attendance stat</div>
+          <div class="block">Today's slot</div>
+        </div>
+        <div class="block coral">Check-in banner (if checked in)</div>
+        <div class="block muted">Subscription</div>
+        <div class="block">Plan card</div>
+        <div class="block muted">Offers → carousel</div>
+        <div class="block muted">Recent attendance list</div>
+      </div>
+      <div class="phone-bottomnav"><span class="active">Home</span><span>Attendance</span><span>Gyms</span><span>Buy</span></div>
+    </div>
+    <div class="screen-notes">
+      <h3 class="screen-name">Member dashboard</h3>
+      <ul>
+        <li>HomeWelcomeHeader, HomeQuickActions (4 tiles)</li>
+        <li>HomeQuickStatCard ×2, optional HomeCheckInBanner</li>
+        <li>HomePlanCard, OffersCarousel, PaymentDuesList</li>
+        <li>HomeRecentAttendanceSection with View all</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 09 ATTENDANCE -->
+<section>
+  <h2 class="section-title">09 · Shell — Attendance tab</h2>
+  <p class="screen-meta"><span class="tag shell">Main shell</span> Route: <code>/</code> tab 1</p>
+  <div class="screen-row">
+    <div class="phone">
+      <div class="phone-notch"></div>
+      <div class="phone-appbar">{Gym name}</div>
+      <div class="phone-body tall">
+        <div class="block gradient">Status hero — Checked in / out + time</div>
+        <div class="block row">
+          <div class="block">Total visits</div>
+          <div class="block">This month</div>
+          <div class="block">Streak</div>
+        </div>
+        <div class="block muted">Check in</div>
+        <div class="block row">
+          <div class="block primary">📍 Location</div>
+          <div class="block primary">QR scan</div>
+        </div>
+        <div class="block primary" style="text-align:center;">Check out</div>
+        <div class="block muted">Recent visits</div>
+        <div class="block list-item">Visit card ×3</div>
+      </div>
+      <div class="phone-bottomnav"><span>Home</span><span class="active">Attendance</span><span>Gyms</span><span>Buy</span></div>
+    </div>
+    <div class="screen-notes">
+      <h3 class="screen-name">Check-in hub</h3>
+      <ul>
+        <li>AttendanceStatusHero, AttendanceStatsRow</li>
+        <li>AttendanceMethodCard: GPS + QR</li>
+        <li>Location verify → markMyAttendance RPC</li>
+        <li>Links to MyAttendancePage full history</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 10 GYMS -->
+<section>
+  <h2 class="section-title">10 · Shell — Gyms tab</h2>
+  <p class="screen-meta"><span class="tag shell">Main shell</span> Route: <code>/</code> tab 2 · Title: “All gyms”</p>
+  <div class="screen-row">
+    <div class="phone">
+      <div class="phone-notch"></div>
+      <div class="phone-appbar">All gyms</div>
+      <div class="phone-body">
+        <div class="block hero">Directory stats — total gyms</div>
+        <div class="block list-item"><span class="block icon-box"></span>Gym A — address</div>
+        <div class="block list-item"><span class="block icon-box"></span>Gym B</div>
+        <div class="block list-item"><span class="block icon-box"></span>Your gym (highlighted)</div>
+      </div>
+      <div class="phone-bottomnav"><span>Home</span><span>Attendance</span><span class="active">Gyms</span><span>Buy</span></div>
+    </div>
+    <div class="screen-notes">
+      <h3 class="screen-name">Gym directory (logged in)</h3>
+      <ul>
+        <li>MemberGymsTab → GymsDirectoryTab</li>
+        <li>GymsDirectoryHero + GymListTile list</li>
+        <li>Tap → /gym/:gymId</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 11 BUY -->
+<section>
+  <h2 class="section-title">11 · Shell — Buy tab</h2>
+  <p class="screen-meta"><span class="tag shell">Main shell</span> Route: <code>/</code> tab 3</p>
+  <div class="screen-row">
+    <div class="phone">
+      <div class="phone-notch"></div>
+      <div class="phone-appbar">{Gym name}</div>
+      <div class="phone-body tall">
+        <div class="block hero">Shop header — product count</div>
+        <div class="block row"><span class="block chip primary">All</span><span class="block chip">Protein</span><span class="block chip">Gear</span></div>
+        <div class="block muted">All products</div>
+        <div class="grid-2">
+          <div class="block">Product card</div>
+          <div class="block">Product card</div>
+          <div class="block">Product card</div>
+          <div class="block">Product card</div>
+        </div>
+      </div>
+      <div class="phone-bottomnav"><span>Home</span><span>Attendance</span><span>Gyms</span><span class="active">Buy</span></div>
+    </div>
+    <div class="screen-notes">
+      <h3 class="screen-name">Gym shop</h3>
+      <ul>
+        <li>ShopHeader, ShopCategoryBar (horizontal chips)</li>
+        <li>ProductGrid 2-column cards with image, price, stock</li>
+        <li>ShopEmptyState when no products</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 12 PROFILE -->
+<section class="page-break">
+  <h2 class="section-title">12 · My profile</h2>
+  <p class="screen-meta"><span class="tag feature">Feature</span> Route: <code>/profile</code></p>
+  <div class="screen-row">
+    <div class="phone">
+      <div class="phone-notch"></div>
+      <div class="phone-appbar">My profile ↻</div>
+      <div class="phone-body tall">
+        <div class="block gradient">Profile hero — photo, name, member code</div>
+        <div class="block row"><div class="block">Weight</div><div class="block">Height</div><div class="block">BMI</div></div>
+        <div class="block muted">Subscription → plan card</div>
+        <div class="block muted">Personal — contact rows</div>
+        <div class="block muted">Fitness — goal, gender, age</div>
+        <div class="block muted">Quick actions list</div>
+        <div class="block list-item">Edit profile</div>
+        <div class="block list-item">Diet plans</div>
+        <div class="block list-item">Workout plans</div>
+        <div class="block list-item">AI Fitness Coach</div>
+        <div class="block list-item">Gym support</div>
+        <div class="block list-item">Attendance history</div>
+        <div class="block coral" style="text-align:center;">Logout</div>
+      </div>
+    </div>
+    <div class="screen-notes">
+      <h3 class="screen-name">Member profile hub</h3>
+      <ul>
+        <li>ProfileHeroHeader, ProfileStatsRow, ProfileInfoSection</li>
+        <li>ProfileActionsCard with navigation to all sub-features</li>
+        <li>Reuses HomePlanCard for subscription</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 13 EDIT PROFILE -->
+<section>
+  <h2 class="section-title">13 · Edit profile</h2>
+  <p class="screen-meta"><span class="tag feature">Feature</span> Route: <code>/profile/edit</code></p>
+  <div class="screen-row">
+    <div class="phone">
+      <div class="phone-notch"></div>
+      <div class="phone-appbar">← Edit profile</div>
+      <div class="phone-body">
+        <div class="block" style="text-align:center;">Avatar + change photo</div>
+        <div class="block">Full name field</div>
+        <div class="block">Phone field</div>
+        <div class="block muted">Metrics — tap to edit dialogs</div>
+        <div class="block">Weight · Height · Age</div>
+        <div class="block muted">Gender chips</div>
+        <div class="block muted">Fitness goal cards</div>
+        <div class="block">Notes (multiline)</div>
+        <div class="block primary" style="text-align:center;">Save</div>
+      </div>
+    </div>
+    <div class="screen-notes">
+      <h3 class="screen-name">Editable member fields</h3>
+      <ul>
+        <li>EditMetricDialog for weight/height/age</li>
+        <li>EditProfileGenderSection, EditProfileGoalSection</li>
+        <li>Image upload to storage</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 14 DIET LIST -->
+<section>
+  <h2 class="section-title">14 · Diet plans list</h2>
+  <p class="screen-meta"><span class="tag feature">Feature</span> Route: <code>/profile/diet</code></p>
+  <div class="screen-row">
+    <div class="phone">
+      <div class="phone-notch"></div>
+      <div class="phone-appbar">My diet plans ↻</div>
+      <div class="phone-body">
+        <div class="block gradient">Info banner — personalized nutrition</div>
+        <div class="block row"><span class="block chip">All</span><span class="block chip">Weight loss</span><span class="block chip">Muscle</span></div>
+        <div class="block list-item"><span class="block icon-box"></span>Diet plan card — goal, meals</div>
+        <div class="block list-item"><span class="block icon-box"></span>Diet plan card</div>
+      </div>
+    </div>
+    <div class="screen-notes">
+      <h3 class="screen-name">Assigned diet plans</h3>
+      <ul>
+        <li>Goal filter chips, DietPlanCard list</li>
+        <li>Tap → /profile/diet/:dietPlanId</li>
+        <li>Empty state when no plans assigned</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 15 DIET DETAIL -->
+<section>
+  <h2 class="section-title">15 · Diet plan detail</h2>
+  <p class="screen-meta"><span class="tag feature">Feature</span> Route: <code>/profile/diet/:id</code></p>
+  <div class="screen-row">
+    <div class="phone">
+      <div class="phone-notch"></div>
+      <div class="phone-appbar">← Plan name</div>
+      <div class="phone-body tall">
+        <div class="block hero">Cover image + title + goal badge</div>
+        <div class="block row"><div class="block">Calories</div><div class="block">Protein</div><div class="block">Carbs</div></div>
+        <div class="block muted">Breakfast 8:00 AM</div>
+        <div class="block list-item">Food item + portion</div>
+        <div class="block list-item">Food item</div>
+        <div class="block muted">Lunch</div>
+        <div class="block list-item">Food items…</div>
+        <div class="block muted">Dinner · Snacks</div>
+      </div>
+    </div>
+    <div class="screen-notes">
+      <h3 class="screen-name">Meal-by-meal breakdown</h3>
+      <ul>
+        <li>DietMacroRow summary, meals grouped by label/time</li>
+        <li>Food rows with guidance text per meal</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 16 WORKOUT LIST -->
+<section class="page-break">
+  <h2 class="section-title">16 · Workout plans list</h2>
+  <p class="screen-meta"><span class="tag feature">Feature</span> Route: <code>/profile/workout</code></p>
+  <div class="screen-row">
+    <div class="phone">
+      <div class="phone-notch"></div>
+      <div class="phone-appbar">My workout plans ↻</div>
+      <div class="phone-body">
+        <div class="block list-item"><span class="block icon-box"></span>Plan — sessions/wk, level</div>
+        <div class="block list-item"><span class="block icon-box"></span>Plan card</div>
+        <div class="block muted" style="text-align:center;">Empty: No workout plans yet</div>
+      </div>
+    </div>
+    <div class="screen-notes">
+      <h3 class="screen-name">Assigned workout plans</h3>
+      <ul>
+        <li>Card shows name, goal, sessions/week, experience</li>
+        <li>Tap → /profile/workout/:workoutPlanId</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 17 WORKOUT DETAIL -->
+<section>
+  <h2 class="section-title">17 · Workout plan detail</h2>
+  <p class="screen-meta"><span class="tag feature">Feature</span> Route: <code>/profile/workout/:id</code></p>
+  <div class="screen-row">
+    <div class="phone">
+      <div class="phone-notch"></div>
+      <div class="phone-appbar">← Plan name ↻</div>
+      <div class="phone-body tall">
+        <div class="block hero">Description, duration, equipment</div>
+        <div class="block primary" style="text-align:center;">Adjust plan from my progress (AI)</div>
+        <div class="block muted">Day 1 — Push</div>
+        <div class="block list-item">Exercise · sets × reps</div>
+        <div class="block row"><span class="block chip primary">Complete</span><span class="block chip">Skip</span></div>
+        <div class="block muted">Day 2 — Pull</div>
+        <div class="block list-item">Exercises…</div>
+      </div>
+    </div>
+    <div class="screen-notes">
+      <h3 class="screen-name">Session logging</h3>
+      <ul>
+        <li>Sessions expandable with exercises</li>
+        <li>Complete / Skip → log_my_workout_session</li>
+        <li>AI adjust button calls edge function + apply sessions</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 18 AI CHAT -->
+<section>
+  <h2 class="section-title">18 · AI Fitness Coach</h2>
+  <p class="screen-meta"><span class="tag feature">Feature</span> Route: <code>/fitness-chat</code></p>
+  <div class="screen-row">
+    <div class="phone">
+      <div class="phone-notch"></div>
+      <div class="phone-appbar">AI Fitness Coach · 42 left</div>
+      <div class="phone-body tall">
+        <div class="block list-item"><span class="block icon-box"></span>24/7 coach header card</div>
+        <div class="block muted">Try asking:</div>
+        <div class="block chip">Calories in 2 rotis…</div>
+        <div class="block chip">Workout today?</div>
+        <div class="block chip">Why not losing weight?</div>
+        <div class="block bubble-user">User message</div>
+        <div class="block bubble-bot">Assistant reply bubble</div>
+        <div class="block muted">Thinking… (loading)</div>
+      </div>
+      <div class="phone-banner row"><span class="block input" style="flex:1;">Ask about nutrition…</span><span class="block primary">➤</span></div>
+    </div>
+    <div class="screen-notes">
+      <h3 class="screen-name">Chat assistant</h3>
+      <ul>
+        <li>Suggested prompt chips when empty</li>
+        <li>User/assistant bubbles, quota in app bar</li>
+        <li>Input + send, conversation history</li>
+        <li>Separate from FAQ Gym Support</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 19 SUPPORT -->
+<section>
+  <h2 class="section-title">19 · Gym support (FAQ bot)</h2>
+  <p class="screen-meta"><span class="tag feature">Feature</span> Route: <code>/support</code></p>
+  <div class="screen-row">
+    <div class="phone">
+      <div class="phone-notch"></div>
+      <div class="phone-appbar">Gym Support ↻</div>
+      <div class="phone-body">
+        <div class="block list-item"><span class="block icon-box"></span>Support bot header</div>
+        <div class="block row"><span class="block chip primary">Membership</span><span class="block chip">Hours</span><span class="block chip">Billing</span></div>
+        <div class="block muted">Pick a question:</div>
+        <div class="block list-item">FAQ question tile</div>
+        <div class="block list-item">FAQ question tile</div>
+        <div class="block">Answer panel (expanded)</div>
+      </div>
+    </div>
+    <div class="screen-notes">
+      <h3 class="screen-name">Rule-based FAQ browser</h3>
+      <ul>
+        <li>Category chips → question list → answer</li>
+        <li>Gym-configured FAQs from database</li>
+        <li>Not AI — static Q&amp;A</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 20 GYM DETAIL -->
+<section class="page-break">
+  <h2 class="section-title">20 · Gym detail</h2>
+  <p class="screen-meta"><span class="tag feature">Feature</span> Route: <code>/gym/:gymId</code></p>
+  <div class="screen-row">
+    <div class="phone">
+      <div class="phone-notch"></div>
+      <div class="phone-appbar">← Gym name</div>
+      <div class="phone-body tall">
+        <div class="block image" style="min-height:22pt;">Hero image</div>
+        <div class="block">Address · phone</div>
+        <div class="block muted">Weekly hours card</div>
+        <div class="block row"><span>Mon</span><span>6am–10pm</span></div>
+        <div class="block muted">Amenities / description</div>
+        <div class="block muted">Promotions</div>
+        <div class="block coral">Offer card</div>
+      </div>
+    </div>
+    <div class="screen-notes">
+      <h3 class="screen-name">Single gym view</h3>
+      <ul>
+        <li>GymDetailHero, GymWeeklyHoursCard</li>
+        <li>Contact actions (call, maps)</li>
+        <li>Active promotions list</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 21 CHECKIN -->
+<section>
+  <h2 class="section-title">21 · Check-in (deep link)</h2>
+  <p class="screen-meta"><span class="tag feature">Feature</span> Route: <code>/checkin?gymId=</code></p>
+  <div class="screen-row">
+    <div class="phone">
+      <div class="phone-notch"></div>
+      <div class="phone-appbar">Check in</div>
+      <div class="phone-body">
+        <div class="block hero">Gym name</div>
+        <div class="block muted">QR / link triggered check-in flow</div>
+        <div class="block primary" style="text-align:center;">Confirm check-in</div>
+        <div class="block muted">Location verification step</div>
+      </div>
+    </div>
+    <div class="screen-notes">
+      <h3 class="screen-name">QR deep link landing</h3>
+      <ul>
+        <li>CheckInPage + check_in_flow</li>
+        <li>Requires auth + member linked to gym</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 22 QR + HISTORY -->
+<section>
+  <h2 class="section-title">22 · QR scan &amp; Attendance history</h2>
+  <p class="screen-meta"><span class="tag feature">Feature</span> Modal / pushed routes</p>
+  <div class="screen-row">
+    <div class="phone">
+      <div class="phone-notch"></div>
+      <div class="phone-appbar">← Scan QR</div>
+      <div class="phone-body dark" style="min-height:70mm;">
+        <div class="block" style="flex:1;background:#222;border:2px dashed #20b2aa;text-align:center;color:#fff;">Camera viewfinder</div>
+        <div class="block muted">Align gym QR code</div>
+      </div>
+    </div>
+    <div class="phone">
+      <div class="phone-notch"></div>
+      <div class="phone-appbar">← Attendance history</div>
+      <div class="phone-body">
+        <div class="block row"><div class="block">Total</div><div class="block">Month</div><div class="block">Avg/wk</div></div>
+        <div class="block list-item">Visit card — date, duration</div>
+        <div class="block list-item">Visit card</div>
+        <div class="block list-item">Visit card</div>
+      </div>
+    </div>
+    <div class="screen-notes">
+      <h3 class="screen-name">Secondary attendance screens</h3>
+      <ul>
+        <li><strong>QrScanPage</strong> — mobile_scanner camera overlay</li>
+        <li><strong>MyAttendancePage</strong> — full history with summary stats</li>
+        <li>Opened from Attendance tab or Profile quick actions</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section style="margin-top:20pt;padding-top:12pt;border-top:2px solid #20b2aa;">
+  <h2 class="section-title">Redesign checklist</h2>
+  <p>Use this catalog to redesign in order: <strong>Design tokens → Shell + Home → Profile → Attendance → Diet/Workout → AI Chat → Auth/Onboarding</strong>.</p>
+  <p>For each screen, note the route, components to preserve (data layer), and wireframe regions to restyle. Regenerate this PDF after major UI changes: <code>./generate-pdf.sh</code></p>
+</section>
+
+</body>
+</html>

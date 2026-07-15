@@ -10,6 +10,7 @@ class OnboardingSlideView extends StatelessWidget {
     required this.pageCount,
     required this.isLastPage,
     required this.accentColor,
+    required this.accentOnColor,
     required this.onPrimaryAction,
     required this.onSkip,
   });
@@ -19,6 +20,7 @@ class OnboardingSlideView extends StatelessWidget {
   final int pageCount;
   final bool isLastPage;
   final Color accentColor;
+  final Color accentOnColor;
   final VoidCallback onPrimaryAction;
   final VoidCallback onSkip;
 
@@ -121,7 +123,7 @@ class OnboardingSlideView extends StatelessWidget {
                         onPressed: onPrimaryAction,
                         style: FilledButton.styleFrom(
                           backgroundColor: accentColor,
-                          foregroundColor: Colors.black,
+                          foregroundColor: accentOnColor,
                           elevation: 0,
                           shape: const StadiumBorder(),
                           textStyle: const TextStyle(

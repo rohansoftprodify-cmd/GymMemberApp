@@ -25,7 +25,7 @@ class GymMemberApp extends ConsumerWidget {
 
         return MediaQuery(
           data: mediaQuery.copyWith(
-            textScaler: TextScaler.linear(systemScale * 0.94),
+            textScaler: TextScaler.linear(systemScale * 1.04),
           ),
           child: DeepLinkListener(
             child: SingleSessionGuard(child: child ?? const SizedBox.shrink()),

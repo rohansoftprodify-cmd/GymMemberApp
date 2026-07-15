@@ -11,6 +11,8 @@ import 'package:gym_member_app/src/features/attendance/my_attendance_page.dart';
 import 'package:gym_member_app/src/features/home/widgets/home_plan_card.dart';
 import 'package:gym_member_app/src/features/home/widgets/home_section_label.dart';
 import 'package:gym_member_app/src/features/profile/profile_display_utils.dart';
+import 'package:gym_member_app/src/features/profile/widgets/delete_account_dialog.dart';
+import 'package:gym_member_app/src/features/profile/widgets/delete_account_tile.dart';
 import 'package:gym_member_app/src/features/profile/widgets/profile_actions_card.dart';
 import 'package:gym_member_app/src/features/profile/widgets/profile_hero_header.dart';
 import 'package:gym_member_app/src/features/profile/widgets/profile_stats_row.dart';
@@ -62,7 +64,7 @@ class MemberProfilePage extends ConsumerWidget {
   }
 }
 
-class _ProfileBody extends StatelessWidget {
+class _ProfileBody extends ConsumerWidget {
   const _ProfileBody({
     required this.profile,
     required this.onRefresh,
@@ -74,7 +76,7 @@ class _ProfileBody extends StatelessWidget {
   final Future<void> Function() onLogout;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final semantics = context.appColors;
     final dateFormat = DateFormat.yMMMd();
@@ -135,6 +137,16 @@ class _ProfileBody extends StatelessWidget {
             subtitle: 'Member since ${ProfileDisplayUtils.formatDate(profile.joinedOn, dateFormat)}',
             previewLines: gymPreviews,
             onTap: () => context.push('/profile/gym'),
+          ),
+          const SizedBox(height: _profileSectionGap),
+          const HomeSectionLabel(title: 'Account', icon: Icons.manage_accounts_outlined),
+          DeleteAccountTile(
+            onTap: () => showDeleteAccountDialog(
+              context,
+              ref,
+              app: 'member',
+              exitRoute: '/explore',
+            ),
           ),
           const SizedBox(height: _profileSectionGap),
           const HomeSectionLabel(title: 'Quick actions', icon: Icons.bolt_rounded),

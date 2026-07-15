@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:gym_member_app/src/core/onboarding/onboarding_prefs.dart';
-import 'package:gym_member_app/src/core/theme/app_theme_extensions.dart';
 import 'package:gym_member_app/src/features/onboarding/models/onboarding_slide.dart';
 import 'package:gym_member_app/src/features/onboarding/widgets/onboarding_slide_view.dart';
 
@@ -42,7 +41,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
   @override
   Widget build(BuildContext context) {
-    final accentColor = AppSemanticColors.light.accentLime;
+    final accentColor = Colors.white;
+    final accentOnColor = Colors.black;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light,
@@ -59,6 +59,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
               pageCount: onboardingSlides.length,
               isLastPage: i == onboardingSlides.length - 1,
               accentColor: accentColor,
+              accentOnColor: accentOnColor,
               onPrimaryAction: _next,
               onSkip: _finish,
             );

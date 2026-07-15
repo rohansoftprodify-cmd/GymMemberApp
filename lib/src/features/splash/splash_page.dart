@@ -51,30 +51,23 @@ class _SplashPageState extends State<SplashPage> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [colorScheme.primary, colorScheme.secondary],
-          ),
-        ),
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.fitness_center_rounded, size: 56, color: colorScheme.onPrimary),
-              const SizedBox(height: 12),
-              Text(
-                'GYM MEMBER',
-                style: TextStyle(
-                  color: colorScheme.onPrimary,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 1.2,
-                ),
+      backgroundColor: Colors.black,
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.fitness_center_rounded, size: 56, color: Colors.white),
+            const SizedBox(height: 12),
+            const Text(
+              'GYM MEMBER',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.2,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

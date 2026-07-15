@@ -6,7 +6,6 @@ import 'package:gym_member_app/src/core/utils/height_units.dart';
 import 'package:gym_member_app/src/core/onboarding/profile_setup_prefs.dart';
 import 'package:gym_member_app/src/core/tenant/member_context_provider.dart';
 import 'package:gym_member_app/src/core/tenant/member_profile_provider.dart';
-import 'package:gym_member_app/src/core/theme/app_theme_extensions.dart';
 import 'package:gym_member_app/src/features/profile_setup/models/profile_setup_data.dart';
 import 'package:gym_member_app/src/features/profile_setup/widgets/fitness_goal_list.dart';
 import 'package:gym_member_app/src/features/profile_setup/widgets/profile_setup_scaffold.dart';
@@ -167,7 +166,7 @@ class _ProfileSetupPageState extends ConsumerState<ProfileSetupPage> {
 
   @override
   Widget build(BuildContext context) {
-    final accentColor = AppSemanticColors.light.accentCoral;
+    const accentColor = Colors.white;
 
     return PageView(
       controller: _controller,
@@ -250,7 +249,7 @@ class _ProfileSetupPageState extends ConsumerState<ProfileSetupPage> {
           stepCount: _stepCount,
           child: FitnessGoalList(
             selectedKey: _data.fitnessGoal,
-            accentColor: AppSemanticColors.light.accentLime,
+            accentColor: Colors.white,
             onSelected: (key) => setState(() => _data = _data.copyWith(fitnessGoal: key)),
           ),
           bottom: _continueButton(label: 'Complete setup'),

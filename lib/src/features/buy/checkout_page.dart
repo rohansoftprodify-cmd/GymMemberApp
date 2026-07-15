@@ -129,7 +129,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
           content: Text(
             'Your order #${result.orderId.substring(0, 8)} was submitted for '
             '₹${result.totalAmount.toStringAsFixed(0)}. '
-            'Show this to your gym if needed.',
+            'Your gym will confirm the payment shortly.',
           ),
           actions: [
             FilledButton(
@@ -280,7 +280,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                         if (_paidViaUpi) ...[
                           const SizedBox(height: 10),
                           Text(
-                            'Complete payment in your UPI app, then confirm your order below.',
+                            'Complete payment in your UPI app, then submit your order for gym confirmation.',
                             style: theme.textTheme.labelSmall?.copyWith(
                               color: colorScheme.primary,
                               fontWeight: FontWeight.w600,
@@ -306,12 +306,12 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                             height: 20,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Text('Confirm order after payment'),
+                        : const Text('Submit for confirmation'),
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Stock is reserved when you confirm. Pay the exact total via UPI before confirming.',
+                  'Pay the exact total via UPI, then submit. Your gym will verify and confirm the order.',
                   textAlign: TextAlign.center,
                   style: theme.textTheme.labelSmall?.copyWith(color: semantics.mutedText, height: 1.35),
                 ),
